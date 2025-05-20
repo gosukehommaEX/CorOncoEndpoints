@@ -1,26 +1,23 @@
 Package: CorrSurvBinom
+Type: Package
 Title: Analysis of correlated time-to-event and binary outcomes
 Version: 0.1.0
-Authors@R:
-person(given = "Gosuke",
-family = "Homma",
-role = c("aut", "cre"),
-email = "my.name.is.gosuke@gmail.com")
+Authors@R: person(given = "Gosuke",
+                  family = "Homma",
+                  role = c("aut", "cre"),
+                  email = "my.name.is.gosuke@gmail.com")
 Description: Provides functions to generate pseudorandom numbers of correlated
-time-to-event and binary outcomes using copula-based approaches. This
-package is particularly useful for simulation studies in biostatistics,
-survival analysis, and clinical trial design where correlated outcomes
-need to be modeled.
+    time-to-event and binary outcomes using copula-based approaches. This
+    package is particularly useful for simulation studies in biostatistics,
+    survival analysis, and clinical trial design where correlated outcomes
+    need to be modeled..
 License: MIT + file LICENSE
-Encoding: UTF-8
-LazyData: true
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
-Imports:
-dplyr,
-purrr
+Imports: 
+    dplyr,
+    purrr
 Suggests:
-testthat (>= 3.0.0),
-knitr,
-rmarkdown
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
