@@ -65,11 +65,3 @@ Since correlation of paired time-to-event and binary outcomes is not free to ran
 1. Trivedi PK and Zimmer DM. Copula modeling: an introduction for practitioners. Found Trends Econ 2007; 1: 1-111.
 2. Hofert M, Kojadinovic I, Machler M and et al. Elements of Copula Modeling with R. Use R! 2018; 1: 1-267.
 3. Bender R, Augustin T, and Blettner M. Generating survival times to simulate Cox proportional hazards models. Statistics in Medicine 2005; 24: 1713-1723
-
-## Author
-
-Gosuke Homma (my.name.is.gosuke@gmail.com)
-
-## License
-
-This package is released under the MIT License.
