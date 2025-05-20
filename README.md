@@ -12,7 +12,7 @@ You can install the development version from GitHub:
 
 ```r
 # install.packages("devtools")
-devtools::install_github("GosukeHomma/CorrSurvBinom")
+devtools::install_github("gosukehommaEX/CorrSurvBinom")
 ```
 
 ## Usage
