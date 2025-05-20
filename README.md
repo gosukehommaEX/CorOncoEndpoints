@@ -1,5 +1,7 @@
 # CorrSurvBinom
-
+<!-- badges: start -->
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/CorrSurvBinom)](http://cran.r-project.org/package=CorrSurvBinom)
+<!-- badges: end -->
 An R package for analyzing of correlated time-to-event and binary outcomes.
 
 ## Overview
