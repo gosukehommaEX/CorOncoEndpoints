@@ -1,0 +1,11 @@
+pandoc: 3.1.11
+pkgdown: 2.1.3
+pkgdown_sha: ~
+articles:
+  advanced-usage: advanced-usage.html
+  introduction: introduction.html
+  theoretical-background: theoretical-background.html
+last_built: 2025-10-26T13:13Z
+urls:
+  reference: https://gosukehommaEX.github.io/CorOncoEndpoints/reference
+  article: https://gosukehommaEX.github.io/CorOncoEndpoints/articles
