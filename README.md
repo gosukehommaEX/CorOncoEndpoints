@@ -6,6 +6,7 @@
 [![downloads](http://cranlogs.r-pkg.org/badges/grand-total/CorOncoEndpoints)](https://cran.r-project.org/package=CorOncoEndpoints)
 [![downloads](http://cranlogs.r-pkg.org/badges/CorOncoEndpoints)](https://cran.r-project.org/package=CorOncoEndpoints)
 [![pkgdown](https://img.shields.io/badge/pkgdown-documentation-blue.svg)](https://gosukehommaEX.github.io/CorOncoEndpoints/)
+[![R-CMD-check](https://github.com/gosukehommaEX/CorOncoEndpoints/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gosukehommaEX/CorOncoEndpoints/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 An R package for generating correlated oncology endpoints (OS, PFS, Response) in clinical trial simulations.
