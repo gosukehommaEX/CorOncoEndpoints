@@ -1,0 +1,84 @@
+url: https://gosukehommaEX.github.io/CorOncoEndpoints/
+template:
+  bootstrap: 5
+  bootswatch: cosmo
+  theme: arrow-light
+
+home:
+  title: CorOncoEndpoints • Generate Correlated Oncology Endpoints
+  description: >
+    An R package for generating correlated oncology endpoints (OS, PFS, Response)
+    in clinical trial simulations using copula-based methods.
+
+navbar:
+  structure:
+    left:  [home, intro, reference, articles, tutorials, news]
+    right: [search, github]
+  components:
+    home:
+      icon: fas fa-home fa-lg
+      href: index.html
+    intro:
+      text: Get started
+      href: articles/introduction.html
+    reference:
+      text: Reference
+      href: reference/index.html
+    articles:
+      text: Articles
+      menu:
+      - text: Introduction to CorOncoEndpoints
+        href: articles/introduction.html
+      - text: Advanced Usage and Examples
+        href: articles/advanced-usage.html
+      - text: Theoretical Background
+        href: articles/theoretical-background.html
+    news:
+      text: Changelog
+      href: news/index.html
+    github:
+      icon: fab fa-github fa-lg
+      href: https://github.com/gosukehommaEX/CorOncoEndpoints
+
+reference:
+  - title: "Data Generation"
+    desc: >
+      Functions for generating correlated oncology endpoints
+    contents:
+      - rOncoEndpoints
+  - title: "Validation"
+    desc: >
+      Functions for validating simulation results
+    contents:
+      - CheckSimResults
+  - title: "Correlation Analysis"
+    desc: >
+      Functions for analyzing and calculating correlations
+    contents:
+      - CorResponsePFS
+      - CorBoundResponsePFS
+      - CorBoundResponseTTE
+  - title: "Copula Parameters"
+    desc: >
+      Functions for copula parameter calculation
+    contents:
+      - CopulaParamResponseTTE
+
+articles:
+- title: Getting Started
+  navbar: ~
+  contents:
+  - introduction
+- title: Advanced Topics
+  navbar: ~
+  contents:
+  - advanced-usage
+  - theoretical-background
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with
+  components:
+    developed_by: "Developed by Gosuke Homma"
+    built_with: "Built with [pkgdown](https://pkgdown.r-lib.org/)."

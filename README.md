@@ -3,13 +3,20 @@
 <!-- badges: start -->
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/CorOncoEndpoints)](http://cran.r-project.org/package=CorOncoEndpoints)
 [![R-CMD-check](https://github.com/gosukehommaEX/CorOncoEndpoints/workflows/R-CMD-check/badge.svg)](https://github.com/gosukehommaEX/CorOncoEndpoints/actions)
+[![downloads](http://cranlogs.r-pkg.org/badges/grand-total/CorOncoEndpoints)](https://cran.r-project.org/package=CorOncoEndpoints)
+[![downloads](http://cranlogs.r-pkg.org/badges/CorOncoEndpoints)](https://cran.r-project.org/package=CorOncoEndpoints)
+[![pkgdown](https://img.shields.io/badge/pkgdown-documentation-blue.svg)](https://gosukehommaEX.github.io/CorOncoEndpoints/)
 <!-- badges: end -->
 
 An R package for generating correlated oncology endpoints (OS, PFS, Response) in clinical trial simulations.
 
+**Documentation**: Visit our [pkgdown website](https://gosukehommaEX.github.io/CorOncoEndpoints/) for comprehensive documentation.
+
 ## Overview
 
 The `CorOncoEndpoints` package provides a comprehensive set of functions to generate correlated oncology endpoints with appropriate constraints and correlation structures using copula models. This package is particularly useful for simulation studies in oncology clinical trials where multiple endpoints need to be modeled with realistic dependencies.
+
+**📚 [Visit our documentation website](https://gosukehommaEX.github.io/CorOncoEndpoints/)** for detailed guides and examples.
 
 ### Key Features
 
@@ -27,6 +34,28 @@ You can install the development version from GitHub:
 ```r
 # install.packages("devtools")
 devtools::install_github("gosukehommaEX/CorOncoEndpoints")
+```
+
+## Documentation and Vignettes
+
+📖 **Comprehensive guides available on our [pkgdown website](https://gosukehommaEX.github.io/CorOncoEndpoints/)**
+
+Explore our detailed vignettes:
+
+- **[Introduction to CorOncoEndpoints](https://gosukehommaEX.github.io/CorOncoEndpoints/articles/introduction.html)** - Get started with basic usage and examples
+- **[Advanced Usage and Examples](https://gosukehommaEX.github.io/CorOncoEndpoints/articles/advanced-usage.html)** - Complex scenarios and sensitivity analyses  
+- **[Theoretical Background](https://gosukehommaEX.github.io/CorOncoEndpoints/articles/theoretical-background.html)** - Mathematical foundations and derivations
+
+You can also access vignettes locally after installation:
+
+```r
+# View vignette in R
+vignette("introduction", package = "CorOncoEndpoints")
+vignette("advanced-usage", package = "CorOncoEndpoints")
+vignette("theoretical-background", package = "CorOncoEndpoints")
+
+# List all available vignettes
+browseVignettes("CorOncoEndpoints")
 ```
 
 ## Main Functions
@@ -246,6 +275,10 @@ MIT License
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+**Before contributing, please check:**
+- [Our documentation](https://gosukehommaEX.github.io/CorOncoEndpoints/)
+- [Open issues](https://github.com/gosukehommaEX/CorOncoEndpoints/issues)
 
 ## Issues
 

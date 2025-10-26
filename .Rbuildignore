@@ -1,3 +1,16 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^README\.Rmd$
+^README-.*\.png$
 ^LICENSE\.md$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.git$
+^\.gitignore$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
+^codecov\.yml$
+^doc$
+^Meta$

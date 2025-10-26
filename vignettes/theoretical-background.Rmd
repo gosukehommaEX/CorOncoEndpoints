@@ -1,0 +1,287 @@
+---
+title: "Theoretical Background"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Theoretical Background}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+This vignette provides the theoretical foundation for the `CorOncoEndpoints` package, covering:
+
+- The Fleischer model for OS and PFS
+- Copula-based modeling of dependence
+- Correlation bounds (Fréchet-Hoeffding)
+- Mathematical derivations
+
+## The Fleischer Model
+
+### Model Specification
+
+The Fleischer model (2009) provides a framework for modeling the dependence between overall survival (OS) and progression-free survival (PFS).
+
+**Key Components:**
+
+1. **Overall Survival (OS)**: $OS \sim \text{Exp}(\lambda_{OS})$
+2. **Time to Progression (TTP)**: $TTP \sim \text{Exp}(\lambda_{TTP})$
+3. **Progression-Free Survival (PFS)**: $PFS = \min(OS, TTP)$
+
+where OS and TTP are independent.
+
+### Important Properties
+
+**Property 1**: PFS follows an exponential distribution
+$$PFS \sim \text{Exp}(\lambda_{PFS})$$
+where $\lambda_{PFS} = \lambda_{OS} + \lambda_{TTP}$
+
+**Proof**: Since $PFS = \min(OS, TTP)$ with independent exponentials,
+$$P(PFS > t) = P(OS > t) \cdot P(TTP > t) = e^{-\lambda_{OS}t} \cdot e^{-\lambda_{TTP}t} = e^{-(\lambda_{OS} + \lambda_{TTP})t}$$
+
+**Property 2**: Correlation between OS and PFS
+$$\text{Corr}(OS, PFS) = \frac{\lambda_{OS}}{\lambda_{PFS}} = \frac{\lambda_{OS}}{\lambda_{OS} + \lambda_{TTP}}$$
+
+This ensures $0 < \text{Corr}(OS, PFS) < 1$ and automatically satisfies $PFS \leq OS$.
+
+### Median Survival Times
+
+For exponentially distributed time-to-event variables:
+$$\text{Median} = \frac{\log(2)}{\lambda}$$
+
+Therefore:
+- Median OS = $\frac{\log(2)}{\lambda_{OS}}$
+- Median PFS = $\frac{\log(2)}{\lambda_{PFS}}$
+
+## Copula-Based Dependence Modeling
+
+### What is a Copula?
+
+A copula is a function that links marginal distributions to their joint distribution. For two random variables $X$ and $Y$ with marginal distributions $F_X$ and $F_Y$, the copula $C$ satisfies:
+
+$$F_{X,Y}(x,y) = C(F_X(x), F_Y(y))$$
+
+### Why Copulas?
+
+Copulas allow us to:
+
+1. Separate marginal behavior from dependence structure
+2. Model non-linear dependencies
+3. Handle different types of tail dependence
+
+### Clayton Copula
+
+**Definition**:
+$$C(u, v; \theta) = (u^{-\theta} + v^{-\theta} - 1)^{-1/\theta}, \quad \theta > 0$$
+
+**Properties**:
+
+- Lower tail dependence: $\lambda_L = 2^{-1/\theta}$
+- Upper tail independence: $\lambda_U = 0$
+- Kendall's tau: $\tau = \theta / (\theta + 2)$
+- **Cannot model negative dependence** (requires $\theta > 0$)
+
+**Conditional Distribution**:
+$$C_{2|1}(v|u; \theta) = \frac{\partial C(u,v;\theta)}{\partial u} = u^{-\theta-1}(u^{-\theta} + v^{-\theta} - 1)^{-1/\theta - 1}$$
+
+This is used in the generation algorithm.
+
+### Frank Copula
+
+**Definition**:
+$$C(u, v; \theta) = -\frac{1}{\theta} \log\left(1 + \frac{(e^{-\theta u} - 1)(e^{-\theta v} - 1)}{e^{-\theta} - 1}\right)$$
+
+**Properties**:
+
+- Symmetric: No tail dependence ($\lambda_L = \lambda_U = 0$)
+- Kendall's tau: $\tau = 1 - \frac{4}{\theta}\left[1 - D_1(\theta)\right]$ where $D_1$ is the Debye function
+- **Can model negative dependence** ($\theta$ can be negative)
+
+**Conditional Distribution**:
+$$C_{2|1}(v|u; \theta) = \frac{(e^{-\theta v} - 1)(e^{-\theta} - 1)}{(e^{-\theta v} - 1) + (e^{-\theta u} - 1)(e^{-\theta} - 1)}$$
+
+## Correlation Bounds
+
+### Fréchet-Hoeffding Bounds
+
+For any copula $C$:
+$$\max(u + v - 1, 0) \leq C(u,v) \leq \min(u, v)$$
+
+These bounds correspond to:
+
+- **Lower bound**: Perfect negative dependence (countermonotonic copula)
+- **Upper bound**: Perfect positive dependence (comonotonic copula)
+
+### Correlation Bounds for TTE and Binary Response
+
+For a time-to-event variable $T \sim \text{Exp}(\lambda)$ and binary response $R \sim \text{Bernoulli}(p)$:
+
+**Lower Bound**:
+$$\rho_{lower} = -\sqrt{\frac{p}{1-p}} \int_0^{q_p} e^{-\lambda t} dt$$
+
+where $q_p$ is the $p$-th quantile of the exponential distribution.
+
+**Upper Bound**:
+$$\rho_{upper} = \sqrt{\frac{1-p}{p}} \int_{q_p}^\infty e^{-\lambda t} dt$$
+
+These simplify to:
+$$\rho_{lower} = -\sqrt{\frac{p}{1-p}}(1 - p)$$
+$$\rho_{upper} = \sqrt{\frac{1-p}{p}} \cdot p$$
+
+**Important**: These bounds depend only on $p$, not on $\lambda$ (for the TTE-Response case).
+
+### Correlation Bounds for PFS and Response
+
+In the three-endpoint framework (OS + PFS + Response), the bounds for PFS-Response correlation are more complex and depend on both $p$ and the hazard rates:
+
+$$\rho_{lower}^{PFS} = \sqrt{\frac{1-p}{p}} \frac{\lambda_{OS}}{\lambda_{TTP}} \left[(1-p)^{\lambda_{TTP}/\lambda_{OS}} - 1\right]$$
+
+$$\rho_{upper}^{PFS} = \sqrt{\frac{p}{1-p}} \frac{\lambda_{OS}}{\lambda_{TTP}} \left[1 - p^{\lambda_{TTP}/\lambda_{OS}}\right]$$
+
+where $\lambda_{TTP} = \lambda_{PFS} - \lambda_{OS}$.
+
+## Data Generation Algorithm
+
+### Step 1: Generate Uniform Random Variables
+
+For copula-based generation:
+
+1. Generate $U_1 \sim \text{Uniform}(0,1)$
+2. Generate $U_2 \sim \text{Uniform}(0,1)$
+
+### Step 2: Apply Copula Transform
+
+Use the conditional copula to transform $U_2$:
+$$V = C_{2|1}(U_2|U_1; \theta)$$
+
+Now $(U_1, V)$ have the desired dependence structure.
+
+### Step 3: Apply Inverse CDF Transform
+
+Transform uniforms to target distributions:
+
+- **For TTE**: $T = -\frac{1}{\lambda}\log(1 - U_1)$
+- **For Response**: $R = \mathbb{1}\{V > 1 - p\}$
+
+where $\mathbb{1}\{\cdot\}$ is the indicator function.
+
+### Step 4: Enforce PFS ≤ OS Constraint
+
+When generating all three endpoints:
+
+1. Generate $OS \sim \text{Exp}(\lambda_{OS})$
+2. Generate $TTP \sim \text{Exp}(\lambda_{TTP})$ independently
+3. Set $PFS = \min(OS, TTP)$
+
+This automatically ensures $PFS \leq OS$.
+
+## Calculating Copula Parameters
+
+### From Correlation to Theta
+
+Given desired correlation $\rho$ between TTE and Response, we need to find copula parameter $\theta$.
+
+**For Clayton Copula**:
+
+Solve numerically:
+$$\rho = \text{Corr}(T, R) = f_{Clayton}(\theta, p, \lambda)$$
+
+using Hoeffding's formula for covariance.
+
+**For Frank Copula**:
+
+Solve numerically:
+$$\rho = \text{Corr}(T, R) = f_{Frank}(\theta, p, \lambda)$$
+
+The package implements these using numerical optimization (bisection method).
+
+## Validation Metrics
+
+### Bias
+
+$$\text{Bias}(\hat{\theta}) = E[\hat{\theta}] - \theta$$
+
+Measures systematic error. Should be close to 0 for unbiased estimators.
+
+### Mean Squared Error (MSE)
+
+$$\text{MSE}(\hat{\theta}) = E[(\hat{\theta} - \theta)^2] = \text{Var}(\hat{\theta}) + \text{Bias}^2(\hat{\theta})$$
+
+Combines variance and bias into a single measure.
+
+### Root Mean Squared Error (RMSE)
+
+$$\text{RMSE}(\hat{\theta}) = \sqrt{\text{MSE}(\hat{\theta})}$$
+
+Error measure in the original scale.
+
+### Relative Bias
+
+$$\text{Relative Bias}(\hat{\theta}) = \frac{\text{Bias}(\hat{\theta})}{\theta} \times 100\%$$
+
+Expresses bias as a percentage of the true value.
+
+## Mathematical Derivations
+
+### Derivation of Corr(OS, PFS)
+
+Given $PFS = \min(OS, TTP)$ with $OS \sim \text{Exp}(\lambda_1)$ and $TTP \sim \text{Exp}(\lambda_2)$ independent:
+
+$$E[PFS \cdot OS] = E[PFS] \cdot E[OS|PFS = OS] \cdot P(PFS = OS) + E[PFS] \cdot E[OS|PFS < OS] \cdot P(PFS < OS)$$
+
+After integration:
+$$\text{Cov}(OS, PFS) = \frac{1}{(\lambda_1 + \lambda_2)^2}$$
+
+And since:
+$$\text{Var}(OS) = \frac{1}{\lambda_1^2}, \quad \text{Var}(PFS) = \frac{1}{(\lambda_1 + \lambda_2)^2}$$
+
+We get:
+$$\text{Corr}(OS, PFS) = \frac{\text{Cov}(OS, PFS)}{\sqrt{\text{Var}(OS) \cdot \text{Var}(PFS)}} = \frac{\lambda_1}{\lambda_1 + \lambda_2}$$
+
+### Derivation of PFS-Response Correlation
+
+In the three-endpoint framework, the correlation between PFS and Response is derived from:
+
+1. The specified correlation between OS and Response
+2. The Fleischer model relationship $PFS = \min(OS, TTP)$
+3. The copula linking OS and Response
+
+The derivation involves:
+$$\text{Cov}(PFS, R) = E[PFS \cdot R] - E[PFS] \cdot E[R]$$
+
+This requires computing integrals over the copula-linked distributions, which is done numerically in the package.
+
+## References
+
+1. **Fleischer, F., Gaschler-Markefski, B., & Bluhmki, E. (2009)**. A statistical model for the dependence between progression-free survival and overall survival. *Statistics in Medicine*, 28(21), 2669-2686.
+
+2. **Trivedi, P. K., & Zimmer, D. M. (2005)**. Copula modeling: an introduction for practitioners. *Foundations and Trends in Econometrics*, 1(1), 1-111.
+
+3. **Nelsen, R. B. (2006)**. *An introduction to copulas* (2nd ed.). Springer.
+
+4. **Hofert, M., Kojadinovic, I., Maechler, M., & Yan, J. (2018)**. *Elements of copula modeling with R*. Springer.
+
+5. **Joe, H. (2014)**. *Dependence modeling with copulas*. CRC Press.
+
+## Summary
+
+This vignette provided the mathematical foundation for:
+
+- The Fleischer model for OS and PFS
+- Copula-based dependence modeling (Clayton and Frank)
+- Correlation bounds based on Fréchet-Hoeffding bounds
+- Data generation algorithms
+- Validation metrics
+
+Understanding these concepts helps users:
+- Choose appropriate parameter values
+- Interpret simulation results
+- Validate model assumptions
+- Extend the methodology

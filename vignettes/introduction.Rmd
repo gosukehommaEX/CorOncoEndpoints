@@ -1,0 +1,274 @@
+---
+title: "Introduction to CorOncoEndpoints"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to CorOncoEndpoints}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+```{r setup}
+library(CorOncoEndpoints)
+set.seed(123)
+```
+
+## Overview
+
+The `CorOncoEndpoints` package provides tools for generating correlated oncology endpoints in clinical trial simulations. This vignette introduces the basic functionality and common use cases.
+
+## Why CorOncoEndpoints?
+
+In oncology clinical trials, we often need to simulate multiple correlated endpoints:
+
+- **Overall Survival (OS)**: Time from randomization to death
+- **Progression-Free Survival (PFS)**: Time from randomization to progression or death
+- **Objective Response (Response)**: Binary indicator of tumor response
+
+These endpoints are not independent—they exhibit natural correlations. For example:
+
+- Patients who respond to treatment tend to have longer survival times
+- PFS is always ≤ OS (you cannot die before progressing)
+- Response is associated with both OS and PFS
+
+`CorOncoEndpoints` generates realistic simulated data that preserves these correlation structures.
+
+## Basic Usage
+
+### Example 1: Generate OS and Response
+
+Let's start with a simple example generating correlated OS and Response data:
+
+```{r example1}
+# Generate data for two groups
+data1 <- rOncoEndpoints(
+  nsim = 100,                           # 100 simulations
+  group = c("Treatment", "Control"),    # Two treatment groups
+  n = c(150, 150),                      # Sample size per group
+  p = c(0.4, 0.3),                      # Response rates
+  hazard_OS = c(0.05, 0.07),            # Hazard rates for OS
+  rho_tte_resp = c(0.3, 0.2),           # Correlation between OS and Response
+  copula = "Clayton"                    # Copula family
+)
+
+# View first few rows
+head(data1)
+
+# Check dimensions
+cat("Total observations:", nrow(data1), "\n")
+cat("Number of simulations:", length(unique(data1$simID)), "\n")
+cat("Groups:", unique(data1$Group), "\n")
+```
+
+### Example 2: All Three Endpoints
+
+Now let's generate all three endpoints (OS, PFS, Response):
+
+```{r example2}
+data2 <- rOncoEndpoints(
+  nsim = 100,
+  group = c("Experimental", "Standard"),
+  n = c(200, 200),
+  p = c(0.5, 0.35),
+  hazard_OS = c(0.04, 0.06),
+  hazard_PFS = c(0.08, 0.10),           # Note: hazard_PFS > hazard_OS
+  rho_tte_resp = c(0.4, 0.25),          # Correlation between OS and Response
+  copula = "Frank"
+)
+
+head(data2)
+```
+
+**Important**: When generating all three endpoints, you specify the correlation between OS and Response (`rho_tte_resp`). The correlation between PFS and Response is automatically determined by the model structure.
+
+### Example 3: Verify Correlations
+
+Let's check the correlations in our simulated data:
+
+```{r example3}
+# For the Experimental group in simulation 1
+sim1_exp <- subset(data2, simID == 1 & Group == "Experimental")
+
+# Correlation between OS and Response
+cor_os_resp <- cor(sim1_exp$OS, sim1_exp$Response)
+cat("Correlation (OS, Response):", round(cor_os_resp, 3), "\n")
+
+# Correlation between PFS and Response
+cor_pfs_resp <- cor(sim1_exp$PFS, sim1_exp$Response)
+cat("Correlation (PFS, Response):", round(cor_pfs_resp, 3), "\n")
+
+# Correlation between OS and PFS
+cor_os_pfs <- cor(sim1_exp$OS, sim1_exp$PFS)
+cat("Correlation (OS, PFS):", round(cor_os_pfs, 3), "\n")
+
+# Verify PFS <= OS constraint
+cat("All PFS <= OS?", all(sim1_exp$PFS <= sim1_exp$OS), "\n")
+```
+
+## Validation of Simulation Results
+
+Use `CheckSimResults()` to validate that your simulations match theoretical values:
+
+```{r validation}
+# Generate more simulations for better validation
+data_val <- rOncoEndpoints(
+  nsim = 1000,
+  group = c("Treatment", "Control"),
+  n = c(100, 100),
+  p = c(0.4, 0.3),
+  hazard_OS = c(0.05, 0.07),
+  rho_tte_resp = c(0.3, 0.2),
+  copula = "Clayton"
+)
+
+# Validate results
+validation <- CheckSimResults(
+  dataset = data_val,
+  p = c(Treatment = 0.4, Control = 0.3),
+  hazard_OS = c(Treatment = 0.05, Control = 0.07),
+  rho_tte_resp = c(Treatment = 0.3, Control = 0.2),
+  copula = "Clayton"
+)
+
+# Show results
+print(validation, n = 20)
+```
+
+**Interpretation**:
+
+- **Bias**: Should be close to 0 for unbiased methods
+- **Relative_Bias**: < 5% is excellent, < 10% is acceptable
+- **SE**: Standard error of estimates across simulations
+- **RMSE**: Overall accuracy measure
+
+## Understanding Correlation Bounds
+
+Not all correlations are feasible. Use `CorBoundResponseTTE()` to check feasible ranges:
+
+```{r bounds}
+# For response probability = 0.4
+bounds <- CorBoundResponseTTE(p = 0.4)
+cat("Feasible correlation range:", 
+    round(bounds[1], 3), "to", round(bounds[2], 3), "\n")
+
+# Try different response probabilities
+p_values <- c(0.2, 0.4, 0.6, 0.8)
+bounds_matrix <- sapply(p_values, CorBoundResponseTTE)
+colnames(bounds_matrix) <- paste("p =", p_values)
+rownames(bounds_matrix) <- c("Lower", "Upper")
+print(round(bounds_matrix, 3))
+```
+
+Notice that the feasible range depends on the response probability.
+
+## Copula Families
+
+### Clayton Copula
+
+- Exhibits lower tail dependence
+- **Cannot model negative correlations** (rho > 0 only)
+- Good for survival data where patients with poor outcomes tend to have poor outcomes across endpoints
+
+```{r clayton}
+# Clayton copula example
+data_clayton <- rOncoEndpoints(
+  nsim = 100,
+  n = 100,
+  p = 0.4,
+  hazard_OS = 0.05,
+  rho_tte_resp = 0.3,
+  copula = "Clayton"
+)
+
+head(data_clayton)
+```
+
+### Frank Copula
+
+- Flexible for both positive and negative correlations
+- Symmetric tail behavior
+- More general choice
+
+```{r frank}
+# Frank copula with negative correlation
+bounds_neg <- CorBoundResponseTTE(p = 0.4)
+rho_negative <- -0.2  # Must be within bounds
+
+data_frank <- rOncoEndpoints(
+  nsim = 100,
+  n = 100,
+  p = 0.4,
+  hazard_OS = 0.05,
+  rho_tte_resp = rho_negative,
+  copula = "Frank"
+)
+
+# Check negative correlation
+cor(data_frank[data_frank$simID == 1, ]$OS, 
+    data_frank[data_frank$simID == 1, ]$Response)
+```
+
+## Common Use Cases
+
+### Use Case 1: Power Analysis
+
+Generate data under different scenarios to estimate statistical power:
+
+```{r power_analysis, eval = FALSE}
+# Scenario: Treatment vs Control
+scenarios <- expand.grid(
+  hazard_ratio = c(0.7, 0.8, 0.9),
+  response_diff = c(0.1, 0.15, 0.2),
+  correlation = c(0.2, 0.3, 0.4)
+)
+
+# For each scenario, generate data and calculate power
+# (Example code structure - not run)
+```
+
+### Use Case 2: Sample Size Calculation
+
+Determine required sample size for detecting treatment effects:
+
+```{r sample_size, eval = FALSE}
+# Generate data with different sample sizes
+n_values <- c(50, 100, 150, 200)
+
+# For each n, simulate trials and calculate detection rates
+# (Example code structure - not run)
+```
+
+### Use Case 3: Trial Design Evaluation
+
+Compare different trial designs (e.g., different endpoints, different copulas):
+
+```{r trial_design, eval = FALSE}
+# Compare Clayton vs Frank copula
+# Compare OS-only vs OS+Response endpoints
+# (Example code structure - not run)
+```
+
+## Summary
+
+This vignette introduced the basic functionality of `CorOncoEndpoints`:
+
+1. **Generate correlated endpoints** with `rOncoEndpoints()`
+2. **Validate simulations** with `CheckSimResults()`
+3. **Check feasible correlations** with `CorBoundResponseTTE()`
+4. **Choose appropriate copulas** (Clayton for positive only, Frank for both)
+
+For more advanced usage, see the "Advanced Usage and Examples" vignette. For theoretical details, see the "Theoretical Background" vignette.
+
+## Next Steps
+
+- Explore the `advanced-usage` vignette for complex scenarios
+- Read the `theoretical-background` vignette to understand the mathematical framework
+- Check function documentation with `?rOncoEndpoints`, `?CheckSimResults`, etc.
