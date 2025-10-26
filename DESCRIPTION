@@ -1,23 +1,27 @@
-Package: CorrSurvBinom
+Package: CorOncoEndpoints
 Type: Package
-Title: Analysis of correlated time-to-event and binary outcomes
+Title: Generate Correlated Oncology Endpoints for Clinical Trial Simulations
 Version: 0.1.0
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
                   role = c("aut", "cre"),
                   email = "my.name.is.gosuke@gmail.com")
-Description: Provides functions to generate pseudorandom numbers of correlated
-    time-to-event and binary outcomes using copula-based approaches. This
-    package is particularly useful for simulation studies in biostatistics,
-    survival analysis, and clinical trial design where correlated outcomes
-    need to be modeled..
+Description: Provides functions to generate correlated oncology endpoints including
+    overall survival (OS), progression-free survival (PFS), and objective response
+    using copula-based approaches. This package supports flexible configurations
+    for clinical trial simulations with appropriate correlation structures and
+    constraints (e.g., PFS <= OS).
 License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
 Imports: 
-    dplyr,
-    purrr
+    stats,
+    tibble
 Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+Depends: R (>= 3.5.0)
+URL: https://github.com/gosukehommaEX/CorOncoEndpoints
+BugReports: https://github.com/gosukehommaEX/CorOncoEndpoints/issues
