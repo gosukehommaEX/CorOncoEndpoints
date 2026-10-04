@@ -50,3 +50,8 @@ rsconnect/
 docs
 /doc/
 /Meta/
+# compiled code
+src/*.o
+src/*.so
+src/*.dll
+__pycache__/

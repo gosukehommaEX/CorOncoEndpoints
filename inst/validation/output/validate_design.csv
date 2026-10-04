@@ -1,0 +1,4 @@
+"endpoint","method","hazard_ratio","events","power","mcse","judgment"
+"os","RequiredEvents (average hazard ratio)",0.746035215627039,366,0.80425,0.00632455532033676,"PASS"
+"pfs","RequiredEvents (average hazard ratio)",0.7,247,0.8075,0.00632455532033676,"PASS"
+"os","Schoenfeld with the hazard ratio of the medians",0.799265195143165,626,0.91775,0.00632455532033676,"INFO"

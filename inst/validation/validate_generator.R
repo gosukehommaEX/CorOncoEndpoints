@@ -1,0 +1,112 @@
+# Validation of rOncoEndpoints() against the theoretical quantities
+#
+# Run from the package root, after devtools::load_all() or
+# library(CorOncoEndpoints):
+#   source("inst/validation/validate_generator.R")
+# Writes inst/validation/output/validate_generator.csv and
+# inst/validation/output/validate_generator.md (generated, do not edit by hand).
+#
+# For each scenario, 2,000,000 patients are generated in 40 batches. The Monte
+# Carlo estimate is the mean over batches and its standard error is the
+# standard deviation over batches divided by sqrt(40). PASS when
+# |z| = |estimate - theory| / SE < 4; FAIL otherwise. Structural checks (for
+# example PFS <= OS for every patient) are PASS or FAIL.
+
+if (!exists("OncoArm")) library(CorOncoEndpoints)
+out_dir <- file.path("inst", "validation", "output")
+dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+
+scenarios <- list(
+  idm_cor = OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40, death.prop = 0.15,
+                    os.median = 15, pps.hr.resp = 0.6),
+  idm_landmark = OncoArm(pfs.median = 6, orr = 0.30, resp.pfs.median = 11,
+                         death.prop = 0.15, pps.median = 8,
+                         resp.timing = "landmark", resp.tau = 1.5),
+  idm_negative = OncoArm(pfs.median = 4, orr = 0.45, resp.cor = -0.2, death.prop = 0.05,
+                         os.median = 10, pps.hr.resp = 2),
+  idm_strong = OncoArm(pfs.median = 10, orr = 0.6, resp.cor = 0.6, death.prop = 0.3,
+                       os.median = 30, pps.hr.resp = 0.3),
+  expexp_ttr = OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40, death.prop = 0.15,
+                       os.model = "expexp", os.median = 15, resp.timing = "ttr",
+                       resp.tau = 1.5, ttr.median = 2.5),
+  expexp_fleischer = OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40,
+                             death.prop = 0.40, os.model = "expexp", os.median = 15)
+)
+
+nb <- 40
+nper <- 50000
+rows <- list()
+add <- function(scen, quantity, theory, est, se) {
+  z <- if (is.na(se) || se == 0) NA_real_ else (est - theory) / se
+  judg <- if (is.na(z)) {
+    if (isTRUE(all.equal(est, theory))) "PASS" else "FAIL"
+  } else if (abs(z) < 4) "PASS" else "FAIL"
+  rows[[length(rows) + 1L]] <<- data.frame(scenario = scen, quantity = quantity,
+                                           theory = theory, estimate = est, se = se,
+                                           z = z, judgment = judg,
+                                           stringsAsFactors = FALSE)
+}
+
+for (nm in names(scenarios)) {
+  arm <- scenarios[[nm]]
+  cr <- CorEndpoints(arm)
+  stats_b <- matrix(NA_real_, nb, 13)
+  struct_ok <- TRUE
+  for (b in seq_len(nb)) {
+    d <- rOncoEndpoints(nsim = 1, n = nper, arms = arm, seed = 1000 * b + nchar(nm))
+    r <- d$response == 1
+    struct_ok <- struct_ok && all(d$pfs_time <= d$os_time) &&
+      all((d$os_time == d$pfs_time) == (d$progression == 0))
+    if (arm$tau > 0) struct_ok <- struct_ok && all(d$pfs_time[r] > arm$tau)
+    if (arm$resp.timing == "ttr") {
+      struct_ok <- struct_ok && all(d$ttr[r] >= arm$tau & d$ttr[r] < d$pfs_time[r])
+    }
+    stats_b[b, ] <- c(mean(r), mean(d$progression == 0),
+                      cor(d$pfs_time, d$response), cor(d$os_time, d$response),
+                      cor(d$pfs_time, d$os_time),
+                      mean(d$pfs_time > 6), mean(d$pfs_time[r] > 6), mean(d$pfs_time[!r] > 6),
+                      mean(d$os_time > 12), mean(d$os_time[r] > 12), mean(d$os_time[!r] > 12),
+                      mean(d$os_time > 24), mean(d$os_time))
+  }
+  est <- colMeans(stats_b)
+  se <- apply(stats_b, 2, stats::sd) / sqrt(nb)
+  mean_os <- if (arm$os.model == "expexp") 1 / arm$lam_o else {
+    1 / arm$lam_p + (1 - arm$death.prop) *
+      (arm$orr / arm$gam1 + (1 - arm$orr) / arm$gam0)
+  }
+  th <- c(arm$orr, arm$death.prop, cr[["cor.pfs.resp"]], cr[["cor.os.resp"]], cr[["cor.pfs.os"]],
+          SurvEndpoint(arm, 6, "pfs"), SurvEndpoint(arm, 6, "pfs", "responders"),
+          SurvEndpoint(arm, 6, "pfs", "nonresponders"),
+          SurvEndpoint(arm, 12, "os"), SurvEndpoint(arm, 12, "os", "responders"),
+          SurvEndpoint(arm, 12, "os", "nonresponders"), SurvEndpoint(arm, 24, "os"),
+          mean_os)
+  labs <- c("response rate", "proportion of deaths before progression",
+            "Corr(PFS, R)", "Corr(OS, R)", "Corr(PFS, OS)",
+            "S_PFS(6)", "S_PFS(6), responders", "S_PFS(6), non-responders",
+            "S_OS(12)", "S_OS(12), responders", "S_OS(12), non-responders",
+            "S_OS(24)", "mean OS")
+  for (i in seq_along(labs)) add(nm, labs[i], th[i], est[i], se[i])
+  add(nm, "structural checks (PFS <= OS, landmark, TTR range)", 1, as.numeric(struct_ok), NA)
+}
+
+res <- do.call(rbind, rows)
+utils::write.csv(res, file.path(out_dir, "validate_generator.csv"), row.names = FALSE)
+tab <- table(factor(res$judgment, levels = c("PASS", "FAIL")))
+md <- c("# Validation of the generator",
+        "",
+        "Generated by `inst/validation/validate_generator.R`. Do not edit by hand.",
+        "",
+        paste0(nb, " batches of ", nper, " patients per scenario; PASS when |z| < 4."),
+        "",
+        paste0("PASS: ", tab[["PASS"]], ", FAIL: ", tab[["FAIL"]],
+               ", largest |z|: ", sprintf("%.2f", max(abs(res$z), na.rm = TRUE))),
+        "",
+        "| Scenario | Quantity | Theory | Estimate | SE | z | Judgment |",
+        "|---|---|---|---|---|---|---|",
+        sprintf("| %s | %s | %.5f | %.5f | %s | %s | %s |", res$scenario, res$quantity,
+                res$theory, res$estimate,
+                ifelse(is.na(res$se), "-", sprintf("%.5f", res$se)),
+                ifelse(is.na(res$z), "-", sprintf("%.2f", res$z)), res$judgment),
+        "")
+writeLines(md, file.path(out_dir, "validate_generator.md"))
+print(tab)

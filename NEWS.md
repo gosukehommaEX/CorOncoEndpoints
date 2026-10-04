@@ -1,3 +1,56 @@
+# CorOncoEndpoints 0.2.0
+
+## Breaking changes
+
+* The package has been rewritten. A treatment group is now defined with
+  `OncoArm()`, and `rOncoEndpoints()` takes a list of `OncoArm` objects
+  (`arms`), sample sizes, accrual, dropout and a `seed`.
+* Response is now linked to PFS (through a Gaussian copula) instead of to the
+  death time. In version 0.1.0, response was linked to OS by a Clayton or Frank
+  copula and time to progression was independent of response, so that
+  `Corr(PFS, R)` was always smaller than `Corr(OS, R)`.
+* Removed `CheckSimResults()`, `CopulaParamResponseTTE()`,
+  `CorBoundResponsePFS()`, `CorBoundResponseTTE()` and `CorResponsePFS()`.
+
+## New features
+
+* `OncoArm()` calibrates the generator to design inputs: PFS median or
+  hazard, objective response rate, the correlation between PFS and response
+  (`resp.cor`) or the median PFS of responders (`resp.pfs.median`), the
+  proportion of PFS events that are deaths (`death.prop`), and the OS median
+  or the post-progression survival.
+* Two OS models: `os.model = "idm"` (illness-death model in which the death
+  hazard after progression can differ from the death hazard before progression
+  and can depend on response through `pps.hr.resp`) and
+  `os.model = "expexp"` (PFS and OS both exactly exponential).
+* Timing of response: `resp.timing = "landmark"` (responders have PFS longer
+  than `resp.tau`) and `resp.timing = "ttr"` (time to response between
+  `resp.tau` and PFS). PFS stays exactly exponential and the response
+  probability stays exactly `orr`.
+* `CorEndpoints()`, `SurvEndpoint()`, `QuantileEndpoint()` and
+  `CorBoundPFSResponse()` give the implied correlations, survival functions,
+  quantiles and the attainable range of the PFS and response correlation.
+* `ExpectedEvents()`, `AverageHR()` and `RequiredEvents()` compute expected
+  events, the average hazard ratio and the number of events required by the
+  log-rank test when OS hazards are not proportional.
+* `CutoffData()` and `EventTime()` give data at an analysis cutoff, including
+  the response observed by the cutoff, and event-driven cutoff times.
+* Random numbers are generated with 'dqrng' and transformed in C++ via 'Rcpp'.
+
+## Verification
+
+* Tests compare with values computed independently in Python
+  (`inst/validation/python`) and with published values of Fleischer et al.
+  (2009) and of the TrialSimulator documentation.
+* `inst/reproduce/reproduce_published.R` reproduces published numbers;
+  `inst/validation/validate_generator.R` and
+  `inst/validation/validate_design.R` check the generator and
+  `RequiredEvents()` by simulation.
+
+## Dependencies
+
+* Imports 'Rcpp' and 'dqrng'; 'tibble' is no longer used. R (>= 4.1.0).
+
 # CorOncoEndpoints 0.1.0
 
 ## Initial Release

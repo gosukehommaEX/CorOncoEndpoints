@@ -1,31 +1,46 @@
 Package: CorOncoEndpoints
 Type: Package
-Title: Generate Correlated Oncology Endpoints for Clinical Trial Simulations
-Version: 0.1.0
+Title: Correlated Progression-Free Survival, Overall Survival and Objective
+    Response for Oncology Trial Simulation
+Version: 0.2.0
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
                   role = c("aut", "cre"),
                   email = "my.name.is.gosuke@gmail.com")
-Description: Provides functions to generate correlated oncology endpoints including
-    overall survival (OS), progression-free survival (PFS), and objective response
-    using copula-based approaches. This package supports flexible configurations
-    for clinical trial simulations with appropriate correlation structures and
-    constraints (e.g., PFS <= OS).
+Description: Generates correlated progression-free survival (PFS), overall
+    survival (OS) and binary objective response for oncology clinical trial
+    simulations. PFS is exactly exponential and the response probability
+    equals the specified objective response rate; PFS and response are linked
+    through a Gaussian copula. OS follows an illness-death structure in which
+    the death hazard after progression can differ from the death hazard before
+    progression and can depend on response (Fleischer et al. (2009)
+    <doi:10.1002/sim.3637>; Meller et al. (2019) <doi:10.1002/sim.8295>), or,
+    alternatively, both PFS and OS are exactly exponential. The generator is
+    calibrated to design inputs such as medians, the response rate and the
+    association between PFS and response, and further functions compute the
+    implied correlations, survival functions, expected numbers of events,
+    average hazard ratios and the number of events required by the log-rank
+    test. Random numbers are generated with 'dqrng' and transformed in 'C++'
+    via 'Rcpp'.
 License: MIT + file LICENSE
-Encoding: UTF-8
-LazyData: true
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
-Imports: 
-    stats,
-    tibble
-Suggests:
-    testthat (>= 3.0.0),
-    knitr,
-    rmarkdown
-Config/testthat/edition: 3
-Depends: R (>= 3.5.0)
 URL: https://github.com/gosukehommaEX/CorOncoEndpoints,
     https://gosukehommaEX.github.io/CorOncoEndpoints/
 BugReports: https://github.com/gosukehommaEX/CorOncoEndpoints/issues
+Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
+Imports:
+    stats,
+    Rcpp,
+    dqrng
+LinkingTo:
+    Rcpp,
+    dqrng
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    survival
+Config/testthat/edition: 3
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

@@ -7,8 +7,8 @@ template:
 home:
   title: CorOncoEndpoints • Generate Correlated Oncology Endpoints
   description: >
-    An R package for generating correlated oncology endpoints (OS, PFS, Response)
-    in clinical trial simulations using copula-based methods.
+    Generates correlated progression-free survival, overall survival and
+    objective response for oncology clinical trial simulations.
 
 navbar:
   structure:
@@ -27,12 +27,12 @@ navbar:
     articles:
       text: Articles
       menu:
-      - text: Introduction to CorOncoEndpoints
+      - text: Getting started with CorOncoEndpoints
         href: articles/introduction.html
-      - text: Advanced Usage and Examples
-        href: articles/advanced-usage.html
-      - text: Theoretical Background
-        href: articles/theoretical-background.html
+      - text: Model and theory
+        href: articles/theory.html
+      - text: Number of events for PFS and OS
+        href: articles/design.html
     news:
       text: Changelog
       href: news/index.html
@@ -41,39 +41,45 @@ navbar:
       href: https://github.com/gosukehommaEX/CorOncoEndpoints
 
 reference:
-  - title: "Data Generation"
+  - title: "Treatment groups"
     desc: >
-      Functions for generating correlated oncology endpoints
+      Define a treatment group and calibrate the generator
+    contents:
+      - OncoArm
+      - print.OncoArm
+  - title: "Data generation"
+    desc: >
+      Generate patient-level data and data at analysis cutoffs
     contents:
       - rOncoEndpoints
-  - title: "Validation"
+      - CutoffData
+      - EventTime
+  - title: "Properties of a group"
     desc: >
-      Functions for validating simulation results
+      Implied correlations, survival functions and quantiles
     contents:
-      - CheckSimResults
-  - title: "Correlation Analysis"
+      - CorEndpoints
+      - SurvEndpoint
+      - QuantileEndpoint
+      - CorBoundPFSResponse
+  - title: "Trial design"
     desc: >
-      Functions for analyzing and calculating correlations
+      Expected events, average hazard ratio and required events
     contents:
-      - CorResponsePFS
-      - CorBoundResponsePFS
-      - CorBoundResponseTTE
-  - title: "Copula Parameters"
-    desc: >
-      Functions for copula parameter calculation
-    contents:
-      - CopulaParamResponseTTE
+      - ExpectedEvents
+      - AverageHR
+      - RequiredEvents
 
 articles:
 - title: Getting Started
   navbar: ~
   contents:
   - introduction
-- title: Advanced Topics
+- title: Model and design
   navbar: ~
   contents:
-  - advanced-usage
-  - theoretical-background
+  - theory
+  - design
 
 footer:
   structure:

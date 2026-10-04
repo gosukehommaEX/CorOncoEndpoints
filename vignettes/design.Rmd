@@ -1,0 +1,60 @@
+---
+title: "Number of events for PFS and OS"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Number of events for PFS and OS}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(CorOncoEndpoints)
+```
+
+## Two groups
+
+```{r}
+ctl <- OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40, death.prop = 0.15,
+               os.median = 15, pps.hr.resp = 0.6)
+trt <- OncoArm(pfs.median = 6 / 0.7, orr = 0.45, resp.cor = 0.40,
+               death.prop = 0.15, pps.hazard = ctl$gam0, pps.hr.resp = 0.6)
+arms <- list(Control = ctl, Treatment = trt)
+```
+
+PFS is exponential in both groups, so its hazard ratio is constant at 0.7. The
+OS hazard ratio changes over time:
+
+```{r}
+tt <- c(1, 6, 12, 24, 48)
+hr_os <- SurvEndpoint(trt, tt, "os", type = "hazard") /
+  SurvEndpoint(ctl, tt, "os", type = "hazard")
+round(setNames(hr_os, tt), 3)
+```
+
+## Average hazard ratio and required events
+
+The log-rank test does not require proportional hazards, but the Schoenfeld
+formula needs a single hazard ratio. `AverageHR()` averages the log hazard
+ratio with weights equal to the expected events, and `RequiredEvents()`
+iterates between the number of events and the analysis time.
+
+```{r}
+AverageHR(arms, n = c(350, 350), a.time = c(0, 24), endpoint = "os",
+          time = c(24, 36, 48))
+r_os <- RequiredEvents(arms, n = c(350, 350), a.time = c(0, 24), endpoint = "os")
+r_pfs <- RequiredEvents(arms, n = c(350, 350), a.time = c(0, 24), endpoint = "pfs")
+r_os[c("events", "time", "ahr")]
+r_pfs[c("events", "time", "ahr")]
+```
+
+```{r, include = FALSE}
+hr_med <- QuantileEndpoint(ctl, endpoint = "os") / QuantileEndpoint(trt, endpoint = "os")
+d_med <- ceiling((qnorm(0.975) + qnorm(0.8))^2 / (0.25 * log(hr_med)^2))
+```
+
+For OS, `r r_os$events` events are required, expected at month
+`r round(r_os$time, 1)`. Using instead the hazard ratio implied by the two OS
+medians, `r round(hr_med, 3)`, as if OS were exponential would give
+`r d_med` events. The script `inst/validation/validate_design.R` checks by
+simulation that the number from `RequiredEvents()` gives the target power.
