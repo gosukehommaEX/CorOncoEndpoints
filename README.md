@@ -94,4 +94,9 @@ progression-free and overall survival and computation of correlation measures.
 
 ## License
 
-MIT
+The code of this package is licensed under the MIT license (see `LICENSE.md`).
+
+The compiled code includes header files of the 'dqrng' package and calls its
+random number generators. 'dqrng' is licensed under the AGPL-3, and its license
+terms apply to the 'dqrng' components when the compiled package, or software
+built on it, is redistributed.
