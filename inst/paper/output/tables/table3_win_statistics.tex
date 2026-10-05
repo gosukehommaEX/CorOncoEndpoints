@@ -1,0 +1,29 @@
+\begin{table}[htbp]
+\centering
+\caption{Win ratio (WR) and win odds (WO) of prioritized OS, PFS and response, and power of their tests and of the log-rank tests in 10,000 simulated trials per scenario.}
+\label{tab:win}
+\begin{threeparttable}
+\footnotesize
+\begin{tabular}{lrrrrrrrrrr}
+\toprule
+$\kappa$ & $\mathrm{Corr}$ & $\mathrm{Corr}$ & WR & Ties & \multicolumn{3}{c}{Power of the WR test} & WO test & \multicolumn{2}{c}{Log-rank} \\
+\cmidrule(lr){6-8} \cmidrule(lr){10-11}
+ & $(\mathrm{PFS}, R)$ & $(\mathrm{OS}, R)$ & & & Simulated & Formula & Independence & Simulated & OS & PFS \\
+\midrule
+$1$ & 0.0 & $-$0.00 & 1.408 & 0.051 & 0.971 & 0.961 & 0.942 & 0.971 & 0.719 & 0.987 \\
+ & 0.2 & 0.12 & 1.395 & 0.048 & 0.964 & 0.953 & 0.937 & 0.964 & 0.718 & 0.986 \\
+ & 0.4 & 0.24 & 1.391 & 0.050 & 0.961 & 0.949 & 0.936 & 0.961 & 0.711 & 0.987 \\
+ & 0.6 & 0.37 & 1.393 & 0.059 & 0.954 & 0.947 & 0.937 & 0.954 & 0.718 & 0.986 \\
+\midrule
+$0.6$ & 0.0 & 0.17 & 1.428 & 0.048 & 0.983 & 0.973 & 0.964 & 0.983 & 0.836 & 0.987 \\
+ & 0.2 & 0.28 & 1.415 & 0.045 & 0.973 & 0.967 & 0.961 & 0.973 & 0.811 & 0.986 \\
+ & 0.4 & 0.38 & 1.408 & 0.047 & 0.973 & 0.962 & 0.957 & 0.973 & 0.800 & 0.988 \\
+ & 0.6 & 0.48 & 1.401 & 0.056 & 0.961 & 0.955 & 0.948 & 0.961 & 0.767 & 0.988 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item 350 patients per group enrolled uniformly over 24 months; analysis at 367 deaths; one-sided significance level 0.025. Pairs are compared on OS, then on PFS (Gehan scores) and then on response observed by the analysis; WR and Ties are the ratio of the mean proportions of pairs won and lost and the mean proportion of ties. Formula: power from the variance of Yu and Ganju with the mean win, loss and tie proportions. Independence: the same formula with the overall proportions computed from the marginal proportions of each endpoint as if the endpoints were independent (Barnhart et al.). $\mathrm{Corr}(\mathrm{OS}, R)$ is that of the control group.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

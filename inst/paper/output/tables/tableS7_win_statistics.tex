@@ -1,0 +1,37 @@
+\begin{table}[htbp]
+\centering
+\caption{Win statistics of prioritized OS, PFS and response: mean proportions of pairs won and lost on each endpoint, ties, and rejection rates (one-sided 0.025) under the global null and the alternative.}
+\label{tab:winfull}
+\begin{threeparttable}
+\scriptsize
+\begin{tabular}{lrrrrrrrrrrrrr}
+\toprule
+Hypothesis & $\kappa$ & $\mathrm{Corr}$ & \multicolumn{3}{c}{Won/lost on} & Ties & \multicolumn{4}{c}{Rejection rate of the WR and WO tests} & \multicolumn{3}{c}{Other tests} \\
+\cmidrule(lr){4-6} \cmidrule(lr){8-11} \cmidrule(lr){12-14}
+ & & $(\mathrm{PFS}, R)$ & OS & PFS & Response & & WR & WO & WO formula & WO independence & Log-rank OS & Log-rank PFS & Response \\
+\midrule
+Null & 1 & 0.0 & 0.310/0.309 & 0.141/0.141 & 0.021/0.021 & 0.058 & 0.022 & 0.022 & 0.026 & 0.026 & 0.025 & 0.025 & 0.026 \\
+ & 1 & 0.2 & 0.310/0.309 & 0.141/0.141 & 0.023/0.024 & 0.052 & 0.025 & 0.025 & 0.026 & 0.027 & 0.026 & 0.028 & 0.024 \\
+ & 1 & 0.4 & 0.310/0.310 & 0.141/0.141 & 0.024/0.024 & 0.050 & 0.026 & 0.026 & 0.025 & 0.025 & 0.026 & 0.023 & 0.026 \\
+ & 1 & 0.6 & 0.310/0.310 & 0.141/0.141 & 0.023/0.023 & 0.053 & 0.025 & 0.025 & 0.025 & 0.025 & 0.029 & 0.024 & 0.026 \\
+ & 0.6 & 0.0 & 0.311/0.312 & 0.139/0.139 & 0.020/0.020 & 0.057 & 0.025 & 0.025 & 0.026 & 0.026 & 0.026 & 0.025 & 0.025 \\
+ & 0.6 & 0.2 & 0.313/0.312 & 0.139/0.139 & 0.023/0.023 & 0.051 & 0.023 & 0.023 & 0.025 & 0.025 & 0.024 & 0.025 & 0.028 \\
+ & 0.6 & 0.4 & 0.313/0.314 & 0.138/0.138 & 0.024/0.024 & 0.049 & 0.023 & 0.023 & 0.026 & 0.026 & 0.024 & 0.025 & 0.025 \\
+ & 0.6 & 0.6 & 0.315/0.315 & 0.138/0.138 & 0.022/0.022 & 0.051 & 0.025 & 0.025 & 0.025 & 0.025 & 0.027 & 0.024 & 0.022 \\
+\midrule
+Alternative & 1 & 0.0 & 0.363/0.274 & 0.160/0.105 & 0.032/0.015 & 0.051 & 0.971 & 0.971 & 0.961 & 0.941 & 0.719 & 0.987 & 0.986 \\
+ & 1 & 0.2 & 0.362/0.274 & 0.160/0.105 & 0.032/0.018 & 0.048 & 0.964 & 0.964 & 0.953 & 0.937 & 0.718 & 0.986 & 0.985 \\
+ & 1 & 0.4 & 0.362/0.275 & 0.160/0.105 & 0.030/0.018 & 0.050 & 0.961 & 0.961 & 0.948 & 0.936 & 0.711 & 0.987 & 0.983 \\
+ & 1 & 0.6 & 0.362/0.274 & 0.160/0.105 & 0.025/0.014 & 0.059 & 0.954 & 0.954 & 0.947 & 0.937 & 0.718 & 0.986 & 0.983 \\
+ & 0.6 & 0.0 & 0.373/0.272 & 0.158/0.106 & 0.030/0.014 & 0.048 & 0.983 & 0.983 & 0.973 & 0.964 & 0.836 & 0.987 & 0.987 \\
+ & 0.6 & 0.2 & 0.373/0.273 & 0.157/0.105 & 0.030/0.017 & 0.045 & 0.973 & 0.973 & 0.967 & 0.961 & 0.811 & 0.986 & 0.984 \\
+ & 0.6 & 0.4 & 0.373/0.275 & 0.157/0.104 & 0.028/0.017 & 0.047 & 0.973 & 0.973 & 0.962 & 0.957 & 0.800 & 0.988 & 0.984 \\
+ & 0.6 & 0.6 & 0.372/0.278 & 0.157/0.103 & 0.023/0.012 & 0.056 & 0.961 & 0.961 & 0.954 & 0.948 & 0.767 & 0.988 & 0.983 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Settings as in Table 3. WO formula and WO independence: power of the win odds test from the variance formula with the mean proportions and with the proportions computed as if the endpoints were independent. 10,000 trials per scenario.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

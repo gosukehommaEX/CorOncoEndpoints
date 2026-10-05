@@ -1,0 +1,37 @@
+\begin{table}[htbp]
+\centering
+\caption{Operating characteristics of the 2-in-1 design with expansion when $X \ge 1.645$.}
+\label{tab:twoinone}
+\begin{threeparttable}
+\footnotesize
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+Scenario & $\kappa$ & $\mathrm{Corr}$ & $\mathrm{Corr}$ & $\rho_{XY}$ & $\rho_{XZ}$ & $P(\mathrm{Go})$ & ESS & \multicolumn{2}{c}{Probability of success} \\
+\cmidrule(lr){9-10}
+ & & $(\mathrm{PFS}, R)$ & $(\mathrm{OS}, R)$ & & & & & Chen & G1 \\
+\midrule
+Global null & 1 & 0.2 & 0.12 & 0.183 & 0.055 & 0.051 & 140 & 0.0239 & 0.0227 \\
+ & 1 & 0.4 & 0.24 & 0.334 & 0.104 & 0.051 & 140 & 0.0224 & 0.0219 \\
+ & 1 & 0.6 & 0.37 & 0.514 & 0.169 & 0.051 & 140 & 0.0199 & 0.0206 \\
+ & 0.6 & 0.2 & 0.28 & 0.180 & 0.112 & 0.051 & 139 & 0.0254 & 0.0232 \\
+ & 0.6 & 0.4 & 0.38 & 0.337 & 0.165 & 0.051 & 140 & 0.0244 & 0.0225 \\
+ & 0.6 & 0.6 & 0.48 & 0.515 & 0.217 & 0.052 & 140 & 0.0200 & 0.0199 \\
+\midrule
+Response only & 1 & 0.2 & 0.12 & 0.190 & 0.051 & 0.490 & 306 & 0.0217 & 0.0209 \\
+ & 1 & 0.4 & 0.24 & 0.347 & 0.106 & 0.493 & 307 & 0.0200 & 0.0203 \\
+ & 1 & 0.6 & 0.37 & 0.548 & 0.165 & 0.486 & 305 & 0.0179 & 0.0193 \\
+\midrule
+Alternative & 1 & 0.2 & 0.12 & 0.174 & 0.053 & 0.472 & 300 & 0.8110 & 0.7727 \\
+ & 1 & 0.4 & 0.24 & 0.338 & 0.129 & 0.470 & 299 & 0.7863 & 0.7435 \\
+ & 1 & 0.6 & 0.37 & 0.543 & 0.206 & 0.474 & 300 & 0.7650 & 0.7205 \\
+ & 0.6 & 0.2 & 0.28 & 0.194 & 0.130 & 0.480 & 302 & 0.8123 & 0.7743 \\
+ & 0.6 & 0.4 & 0.38 & 0.333 & 0.167 & 0.478 & 302 & 0.7930 & 0.7544 \\
+ & 0.6 & 0.6 & 0.48 & 0.556 & 0.249 & 0.472 & 299 & 0.7545 & 0.7067 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item $\rho_{XY}$ and $\rho_{XZ}$: simulated correlations of $X$ with $Y_{\mathrm{PFS}}$ and with $Z_{\mathrm{OS}}$. ESS, expected sample size. Chen: success if PFS is significant at the end of the small trial or OS at the end of the large trial (one-sided 0.025). G1: PFS and OS tested at 0.0125 each with the level passed on after a rejection. Global null: identical groups. Response only: response rate 0.47 versus 0.30 with identical PFS and OS distributions. Alternative: PFS hazard ratio 0.55 and response rate 0.47. 100,000 trials per null scenario and 10,000 per alternative scenario.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

@@ -1,0 +1,27 @@
+\begin{table}[htbp]
+\centering
+\caption{Validation of the functions used for the trial examples and of the hazard formulas of Figure 1.}
+\label{tab:functions}
+\begin{threeparttable}
+\scriptsize
+\begin{tabular}{p{7cm}rrrrrr}
+\toprule
+Check & Comparisons & Largest difference & Tolerance & PASS & EXPLAINED & FAIL \\
+\midrule
+hand-made data vs Python & 28 & 4.9e-15 & 1e-12 & 28 & 0 & 0 \\
+formulas vs Python & 5 & 3.3e-16 & 1e-12 & 5 & 0 & 0 \\
+published value & 1 & 0.0e+00 &   0 & 1 & 0 & 0 \\
+log-rank vs survival::survdiff (20 trials) & 8 & 2.7e-14 & 1e-08 & 8 & 0 & 0 \\
+response Z vs stats::prop.test (20 trials) & 1 & 8.9e-16 & 1e-10 & 1 & 0 & 0 \\
+win statistics vs BuyseTest & 25 & 4.4e-16 & 1e-06 & 25 & 0 & 0 \\
+2-in-1 data & 2 & 0.0e+00 &   0 & 2 & 0 & 0 \\
+2-in-1 statistics vs survival and stats (5 trials) & 5 & 2.5e-14 & 1e-08 & 5 & 0 & 0 \\
+Figure 1 formulas & 5 & 2.6e-07 & 3.4e-05 & 5 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Expected values of the hand-made data set were computed independently with loop-based Python code. Simulated data sets were compared with \texttt{survival::survdiff()}, \texttt{stats::prop.test()} and the \texttt{BuyseTest} package.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

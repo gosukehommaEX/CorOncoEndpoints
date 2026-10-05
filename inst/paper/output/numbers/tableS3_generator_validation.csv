@@ -1,0 +1,5 @@
+"item","key","value","description","source"
+"tableS3_generator_validation","n_pass",84,"number of PASS","inst/validation/output/validate_generator.csv"
+"tableS3_generator_validation","n_fail",0,"number of FAIL","inst/validation/output/validate_generator.csv"
+"tableS3_generator_validation","n_rows",84,"number of comparisons","inst/validation/output/validate_generator.csv"
+"tableS3_generator_validation","max_abs_z",3.11330619062004,"largest |z|","inst/validation/output/validate_generator.csv"

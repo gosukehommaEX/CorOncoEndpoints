@@ -1,0 +1,33 @@
+\begin{table}[htbp]
+\centering
+\caption{Number of events required by the Schoenfeld formula with the average hazard ratio (average HR) and with the hazard ratio of the two OS medians (HR of medians), and power of the log-rank test in 10,000 simulated trials per scenario.}
+\label{tab:events}
+\begin{threeparttable}
+\small
+\begin{tabular}{llrrrrr}
+\toprule
+Scenario & Analysis & HR & Events & \multicolumn{2}{c}{Analysis time} & Power (MCSE) \\
+\cmidrule(lr){5-6}
+ & & & & Expected & Simulated & \\
+\midrule
+$\pi = 0.15$, $\kappa = 0.6$ & OS, average HR & 0.746 & 366 & 30.6 & 30.6 & 0.798 (0.004) \\
+ & OS, HR of medians & 0.799 & 626 & 57.2 & 57.1 & 0.920 (0.003) \\
+ & PFS & 0.700 & 247 & 16.8 & 16.7 & 0.793 (0.004) \\
+\midrule
+$\pi = 0.15$, $\kappa = 1$ & OS, average HR & 0.774 & 479 & 37.3 & 37.3 & 0.798 (0.004) \\
+ & OS, HR of medians & 0.825 & 848\tnote{a} & -- & -- & -- \\
+\midrule
+$\pi = 0.30$, $\kappa = 0.6$ & OS, average HR & 0.773 & 475 & 39.2 & 39.2 & 0.802 (0.004) \\
+ & OS, HR of medians & 0.791 & 571 & 50.7 & 50.7 & 0.830 (0.004) \\
+\midrule
+Exp--exp, OS HR 0.75 & OS, average HR & 0.750 & 380 & 32.5 & 32.5 & 0.796 (0.004) \\
+ & OS, HR of medians & 0.750 & 380 & 32.5 & 32.5 & 0.796 (0.004) \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item 350 patients per group enrolled uniformly over 24 months, one-sided significance level 0.025 and target power 0.8. Control group: PFS median 6 months, response rate 0.30, $\mathrm{Corr}(\mathrm{PFS}, R) = 0.40$, OS median 15 months. Experimental group: PFS hazard ratio 0.7 and response rate 0.45, with the same post-progression hazards. Exp--exp: both groups with exponential PFS and OS. Analysis times are in months from the start of enrolment. PFS rows are the same in all scenarios and are shown once. MCSE, Monte Carlo standard error.
+\item [a] More events than patients; not attainable.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

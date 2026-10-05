@@ -16,3 +16,4 @@
 ^Meta$
 __pycache__
 \.pyc$
+^inst/paper$
