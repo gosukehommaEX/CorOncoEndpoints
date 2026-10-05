@@ -25,7 +25,7 @@ notes <- c(paste0("PASS: ", tab[["PASS"]], ", EXPLAINED: ", tab[["EXPLAINED"]], 
            })
 write_table_tex("tableS2_reproduction",
                 caption = "Reproduction of published values with the CorOncoEndpoints package.",
-                label = "tab:reproduction", align = "p{3.2cm}p{6.4cm}rrl",
+                label = "tab:reproduction", align = "p{2.2cm}p{4.8cm}rrl",
                 header = "Source & Quantity & Published & Computed & Judgment \\\\",
                 body = body, notes = notes, size = "\\scriptsize")
 write_numbers("tableS2_reproduction",

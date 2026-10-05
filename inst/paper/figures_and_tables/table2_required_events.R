@@ -59,7 +59,8 @@ notes <- c(paste0(tg$n[1], " patients per group enrolled uniformly over ", tg$a_
                   "same in all scenarios and are shown once. MCSE, Monte Carlo standard error."),
            "[a] More events than patients; not attainable.")
 write_table_tex("table2_required_events", caption = caption, label = "tab:events",
-                align = "llrrrrr", header = header, body = body, notes = notes, size = "\\small")
+                align = "p{2.1cm}p{2.4cm}rrrrr", header = header, body = body, notes = notes,
+                size = "\\footnotesize\\setlength{\\tabcolsep}{4pt}")
 nm <- do.call(rbind, num)
 write_numbers("table2_required_events", key = nm$key, value = nm$value,
               description = nm$description, source = src)

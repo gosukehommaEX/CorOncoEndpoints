@@ -1,14 +1,15 @@
 \begin{table}[htbp]
 \centering
-\caption{Win statistics of prioritized OS, PFS and response: mean proportions of pairs won and lost on each endpoint, ties, and rejection rates (one-sided 0.025) under the global null and the alternative.}
+\caption{Win statistics of prioritized OS, PFS and response: mean proportions of pairs won and lost on each endpoint, ties, and rejection rates (one-sided 0.025) under the global null and the alternative (WR and WO: simulated rejection rates and the power given by the variance formula).}
 \label{tab:winfull}
 \begin{threeparttable}
-\scriptsize
+\scriptsize\setlength{\tabcolsep}{3pt}
 \begin{tabular}{lrrrrrrrrrrrrr}
 \toprule
-Hypothesis & $\kappa$ & $\mathrm{Corr}$ & \multicolumn{3}{c}{Won/lost on} & Ties & \multicolumn{4}{c}{Rejection rate of the WR and WO tests} & \multicolumn{3}{c}{Other tests} \\
+Hypothesis & $\kappa$ & $\mathrm{Corr}$ & \multicolumn{3}{c}{Won/lost on} & Ties & \multicolumn{4}{c}{WR and WO tests} & \multicolumn{3}{c}{Other tests} \\
 \cmidrule(lr){4-6} \cmidrule(lr){8-11} \cmidrule(lr){12-14}
- & & $(\mathrm{PFS}, R)$ & OS & PFS & Response & & WR & WO & WO formula & WO independence & Log-rank OS & Log-rank PFS & Response \\
+ & & $(\mathrm{PFS}, R)$ & OS & PFS & Response & & WR & WO & WO & WO & Log-rank & Log-rank & Response \\
+ & & & & & & & & & formula & indep. & OS & PFS & \\
 \midrule
 Null & 1 & 0.0 & 0.334/0.333 & 0.130/0.130 & 0.015/0.015 & 0.043 & 0.024 & 0.024 & 0.026 & 0.026 & 0.025 & 0.024 & 0.025 \\
  & 1 & 0.2 & 0.333/0.334 & 0.130/0.129 & 0.018/0.018 & 0.038 & 0.027 & 0.027 & 0.025 & 0.025 & 0.025 & 0.026 & 0.027 \\

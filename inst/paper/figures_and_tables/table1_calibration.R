@@ -47,7 +47,8 @@ notes <- c(paste0("Hazards are per month and medians are in months. Maximal inde
                   "exponential; the post-progression hazard depends on the time since ",
                   "randomization and is the same for responders and non-responders (--)."))
 write_table_tex("table1_calibration", caption = caption, label = "tab:calibration",
-                align = "lrrrr", header = header, body = body, notes = notes, size = "\\small")
+                align = "p{5.2cm}rrrr", header = header, body = body, notes = notes,
+                size = "\\small")
 keys <- as.vector(outer(vapply(rows, `[`, "", 1), tb$model, paste, sep = "_"))
 vals <- as.vector(as.matrix(tb[, vapply(rows, `[`, "", 1)]))
 vals <- as.vector(t(matrix(vals, nrow = nrow(tb))))

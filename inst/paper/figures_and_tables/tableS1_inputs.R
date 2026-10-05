@@ -23,11 +23,11 @@ body <- c(
 write_table_tex("tableS1_inputs",
                 caption = paste0("Design inputs of \\texttt{OncoArm()}, the model parameters they ",
                                  "determine and how the parameters are obtained."),
-                label = "tab:inputs", align = "p{6.5cm}ll",
+                label = "tab:inputs", align = "p{5.2cm}p{1.6cm}p{5.4cm}",
                 header = "Input (argument) & Parameter & Determination \\\\",
                 body = body,
                 notes = paste0("$(Z_1, Z_2)$ is standard bivariate normal with correlation $\\theta$; ",
                                "$z_\\tau = -\\infty$ without a landmark. In the exp--exp model the ",
                                "pre-progression death hazard is $\\lambda_O e^{-c t}$, which ",
                                "requires $\\pi \\le \\lambda_O / \\lambda_P$."),
-                size = "\\small")
+                size = "\\footnotesize")

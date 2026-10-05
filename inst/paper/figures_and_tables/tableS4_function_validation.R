@@ -18,21 +18,23 @@ sm <- do.call(rbind, lapply(split(vf, grp), function(v) {
              fail = sum(v$judgment == "FAIL"), stringsAsFactors = FALSE)
 }))
 esc <- function(x) gsub("_", "\\\\_", gsub("::", "::", x))
+judg <- ifelse(sm$fail == 0 & sm$explained == 0, "all PASS",
+               paste0(sm$pass, " PASS, ", sm$explained, " EXPLAINED, ", sm$fail, " FAIL"))
 body <- paste0(esc(sm$check), " & ", sm$n, " & ",
                formatC(sm$max_diff, format = "e", digits = 1), " & ",
-               formatC(sm$max_tol, format = "g", digits = 2), " & ",
-               sm$pass, " & ", sm$explained, " & ", sm$fail, " \\\\")
+               formatC(sm$max_tol, format = "g", digits = 2), " & ", judg, " \\\\")
 write_table_tex("tableS4_function_validation",
                 caption = paste0("Validation of the functions used for the trial examples and ",
                                  "of the hazard formulas of Figure 1."),
-                label = "tab:functions", align = "p{7cm}rrrrrr",
-                header = "Check & Comparisons & Largest difference & Tolerance & PASS & EXPLAINED & FAIL \\\\",
+                label = "tab:functions", align = "p{5.6cm}rrrl",
+                header = c("Check & Comparisons & Largest & Tolerance & Judgment \\\\",
+                           " & & difference & & \\\\"),
                 body = body,
                 notes = paste0("Expected values of the hand-made data set were computed ",
                                "independently with loop-based Python code. Simulated data sets ",
                                "were compared with \\texttt{survival::survdiff()}, ",
                                "\\texttt{stats::prop.test()} and the \\texttt{BuyseTest} package."),
-                size = "\\scriptsize")
+                size = "\\scriptsize\\setlength{\\tabcolsep}{3pt}")
 write_numbers("tableS4_function_validation",
               key = c(paste0("n_", seq_len(nrow(sm))), paste0("fail_", seq_len(nrow(sm))),
                       "total", "total_fail"),

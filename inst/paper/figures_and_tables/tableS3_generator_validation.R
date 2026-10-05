@@ -27,7 +27,7 @@ for (i in seq_along(parts)) {
                                    length(parts), "): theoretical values and Monte Carlo ",
                                    "estimates for the scenarios ",
                                    paste0("\\texttt{", esc(parts[[i]]), "}", collapse = " and "), "."),
-                  label = paste0("tab:generator", letters[i]), align = "llrrrrl",
+                  label = paste0("tab:generator", letters[i]), align = "p{2.4cm}p{4.2cm}rrrrl",
                   header = "Scenario & Quantity & Theory & Estimate & SE & $z$ & Judgment \\\\",
                   body = body,
                   notes = paste0("Estimates are means over 40 batches of 50,000 patients; SE is ",
@@ -35,7 +35,7 @@ for (i in seq_along(parts)) {
                                  "$z = (\\mathrm{estimate} - \\mathrm{theory}) / \\mathrm{SE}$. ",
                                  "PASS when $|z| < 4$. The scenarios are defined in ",
                                  "\\texttt{inst/validation/validate\\_generator.R} of the package."),
-                  size = "\\scriptsize")
+                  size = "\\scriptsize\\setlength{\\tabcolsep}{3pt}")
 }
 tab <- table(factor(vg$judgment, levels = c("PASS", "FAIL")))
 write_numbers("tableS3_generator_validation",
