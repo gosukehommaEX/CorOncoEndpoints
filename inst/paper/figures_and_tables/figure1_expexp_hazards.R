@@ -10,10 +10,10 @@ src <- "model_quantities.rds"
 f1 <- readRDS(file.path(data_dir, src))$fig1
 cv <- f1$curves
 
-lab_a <- expression(paste(h[12](t), ": Markov model, constant ", h[02]),
-                    paste(h[12](t), ": exp-exp model"),
-                    paste(h[02](t), ": exp-exp model"),
-                    paste(h[02], " = ", pi, lambda[P], ": constant"),
+lab_a <- expression(paste(h["12"](t), ": Markov model, constant ", h["02"]),
+                    paste(h["12"](t), ": exp-exp model"),
+                    paste(h["02"](t), ": exp-exp model"),
+                    paste(h["02"], " = ", pi, lambda[P], ": constant"),
                     paste(gamma[0], ": illness-death model (", kappa == 1, ")"))
 lev_a <- c("markov", "expexp", "expexp_h02", "const_h02", "idm")
 da <- rbind(data.frame(t = cv$t, h = cv$markov_h12, s = "markov"),
@@ -43,7 +43,7 @@ db <- rbind(data.frame(t = cv$t, h = cv$gumbel_h12, s = "gumbel"),
             data.frame(t = cv$t, h = f1$h02_const, s = "const_h02"))
 lev_b <- c("gumbel", "const_h02")
 lab_b <- expression(paste("Just after progression at ", s, ": Gumbel latent-time model"),
-                    paste(h[02], " = ", pi, lambda[P]))
+                    paste(h["02"], " = ", pi, lambda[P]))
 db$s <- factor(db$s, levels = lev_b)
 p_b <- ggplot(db, aes(t, h, colour = s, linetype = s)) +
   geom_line(linewidth = 0.6) +

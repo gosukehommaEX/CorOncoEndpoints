@@ -54,8 +54,10 @@ p_c <- ggplot(hr, aes(t, hr_os, colour = kappa, linetype = kappa)) +
   scale_x_continuous(breaks = seq(0, 48, 12)) +
   labs(x = "Months", y = "OS hazard ratio") +
   theme_paper + leg
-p <- (((p_a | p_b) + plot_layout(guides = "collect")) | p_c) +
-  plot_layout(widths = c(2, 1)) +
+# the identical legends of (a) and (b) are merged by guides = "collect"; the
+# legend of (c) is placed next to it
+p <- (p_a | p_b | p_c) +
+  plot_layout(guides = "collect") +
   plot_annotation(tag_levels = "a", tag_prefix = "(", tag_suffix = ")") &
   theme(legend.position = "bottom")
 save_figure(p, "figure2_os_distribution", width = fig_width, height = 3.3)
