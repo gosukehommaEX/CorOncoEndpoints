@@ -16,15 +16,16 @@ d <- do.call(rbind, lapply(ids, function(s) {
                                        numeric(1)),
              type = sc$type, resp_cor = sc$resp_cor, kappa = sc$kappa)
 }))
-d$panel <- factor(ifelse(d$type == "N2", "Response effect only, \u03ba = 1",
-                         paste0("Global null, \u03ba = ", d$kappa)),
-                  levels = c("Global null, \u03ba = 1", "Global null, \u03ba = 0.6",
-                             "Response effect only, \u03ba = 1"))
+d$panel <- factor(ifelse(d$type == "N2", "paste('Response effect only, ', kappa == 1)",
+                              paste0("paste('Global null, ', kappa == ", d$kappa, ")")),
+                       levels = c("paste('Global null, ', kappa == 1)",
+                                  "paste('Global null, ', kappa == 0.6)",
+                                  "paste('Response effect only, ', kappa == 1)"))
 p <- ggplot(d, aes(cut, rate, colour = factor(resp_cor))) +
   geom_hline(yintercept = 0.025, colour = "grey40", linetype = "dotted") +
   geom_vline(xintercept = stats::qnorm(0.95), colour = "grey40", linetype = "dotted") +
   geom_line(linewidth = 0.5) +
-  facet_wrap(~ panel, nrow = 1) +
+  facet_wrap(~ panel, nrow = 1, labeller = label_parsed) +
   scale_colour_manual(values = pal[c(2, 3, 4)], name = "Corr(PFS, R)") +
   labs(x = "Expansion cutpoint c for X", y = "Familywise type I error rate") +
   theme_paper + theme(legend.position = "bottom")

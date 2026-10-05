@@ -13,12 +13,14 @@ long <- rbind(data.frame(pi = d$death_prop, kappa = d$kappa, v = d$cor.pfs.os,
               data.frame(pi = d$death_prop, kappa = d$kappa, v = d$cor.os.resp,
                          panel = "Corr(OS, R)"))
 long$panel <- factor(long$panel, levels = c("Corr(PFS, OS)", "Corr(OS, R)"))
-long$kappa <- factor(long$kappa, levels = c(1, 0.6), labels = c("\u03ba = 1", "\u03ba = 0.6"))
+long$kappa <- factor(long$kappa, levels = c(1, 0.6))
 p <- ggplot(long, aes(pi, v, colour = kappa, linetype = kappa)) +
   geom_line(linewidth = 0.6) +
   facet_wrap(~ panel, nrow = 1, scales = "free_y") +
-  scale_colour_manual(values = pal[c(2, 3)], name = NULL) +
-  scale_linetype_manual(values = c("solid", "dashed"), name = NULL) +
+  scale_colour_manual(values = pal[c(2, 3)], labels = expression(kappa == 1, kappa == 0.6),
+                      name = NULL) +
+  scale_linetype_manual(values = c("solid", "dashed"),
+                        labels = expression(kappa == 1, kappa == 0.6), name = NULL) +
   labs(x = "Proportion of PFS events that are deaths", y = "Correlation") +
   theme_paper + theme(legend.position = "bottom")
 save_figure(p, "figureS2_death_proportion", width = fig_width, height = 2.9)

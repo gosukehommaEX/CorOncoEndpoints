@@ -8,7 +8,7 @@
 source(file.path("inst", "paper", "figures_and_tables", "settings.R"))
 src <- "win_statistics_simulation.rds"
 ws <- readRDS(file.path(data_dir, src))
-n_tot <- sum(ws$two_group$n)
+n_tot <- sum(ws$n)
 sm <- do.call(rbind, lapply(ws$results, function(r) {
   data.frame(r$scenario[, c("resp_cor", "kappa", "hypothesis", "scenario")],
              cor_os_resp = r$cor_control[["cor.os.resp"]],
@@ -37,8 +37,9 @@ nsim <- alt$nsim[1]
 caption <- paste0("Win ratio (WR) and win odds (WO) of prioritized OS, PFS and response, and ",
                   "power of their tests and of the log-rank tests in ",
                   format(nsim, big.mark = ","), " simulated trials per scenario.")
-notes <- c(paste0(ws$two_group$n[1], " patients per group enrolled uniformly over ",
-                  ws$two_group$a_time[2], " months; analysis at ", ws$deaths, " deaths; ",
+notes <- c(paste0(ws$n[1], " patients per group enrolled uniformly over ",
+                  ws$two_group$a_time[2], " months; analysis at month ", ws$analysis_time,
+                  " (on average ", round(mean(alt$mean_deaths)), " deaths under the alternative); ",
                   "one-sided significance level ", ws$two_group$alpha, ". Pairs are compared on OS, ",
                   "then on PFS (Gehan scores) and then on response observed by the analysis; ",
                   "WR and Ties are the ratio of the mean proportions of pairs won and lost and ",

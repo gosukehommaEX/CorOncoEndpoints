@@ -11,15 +11,16 @@ long <- rbind(
   data.frame(t = d$t[d$model == "idm_kappa1"], surv = d$pfs[d$model == "idm_kappa1"],
              response = d$response[d$model == "idm_kappa1"], panel = "PFS"),
   data.frame(t = d$t[d$model == "idm_kappa1"], surv = d$os[d$model == "idm_kappa1"],
-             response = d$response[d$model == "idm_kappa1"], panel = "OS, \u03ba = 1"),
+             response = d$response[d$model == "idm_kappa1"], panel = "paste('OS, ', kappa == 1)"),
   data.frame(t = d$t[d$model == "idm_kappa06"], surv = d$os[d$model == "idm_kappa06"],
-             response = d$response[d$model == "idm_kappa06"], panel = "OS, \u03ba = 0.6"))
-long$panel <- factor(long$panel, levels = c("PFS", "OS, \u03ba = 1", "OS, \u03ba = 0.6"))
+             response = d$response[d$model == "idm_kappa06"], panel = "paste('OS, ', kappa == 0.6)"))
+long$panel <- factor(long$panel, levels = c("PFS", "paste('OS, ', kappa == 1)",
+                                          "paste('OS, ', kappa == 0.6)"))
 long$response <- factor(long$response, levels = c("responders", "nonresponders"),
                         labels = c("Responders", "Non-responders"))
 p <- ggplot(long, aes(t, surv, colour = response, linetype = response)) +
   geom_line(linewidth = 0.6) +
-  facet_wrap(~ panel, nrow = 1) +
+  facet_wrap(~ panel, nrow = 1, labeller = label_parsed) +
   scale_colour_manual(values = pal[c(2, 3)], name = NULL) +
   scale_linetype_manual(values = c("solid", "dashed"), name = NULL) +
   scale_x_continuous(breaks = seq(0, 48, 12)) +

@@ -31,10 +31,11 @@ curves <- do.call(rbind, lapply(null_ids, function(s) {
              cut = cuts, simulated = sim_rate, approx = approx, r_xy = r_xy, r_xz = r_xz,
              mu_x = mu, nsim = nrow(st))
 }))
-curves$panel <- factor(ifelse(curves$type == "N2", "Response effect only, \u03ba = 1",
-                              paste0("Global null, \u03ba = ", curves$kappa)),
-                       levels = c("Global null, \u03ba = 1", "Global null, \u03ba = 0.6",
-                                  "Response effect only, \u03ba = 1"))
+curves$panel <- factor(ifelse(curves$type == "N2", "paste('Response effect only, ', kappa == 1)",
+                              paste0("paste('Global null, ', kappa == ", curves$kappa, ")")),
+                       levels = c("paste('Global null, ', kappa == 1)",
+                                  "paste('Global null, ', kappa == 0.6)",
+                                  "paste('Response effect only, ', kappa == 1)"))
 long <- rbind(data.frame(curves[, c("panel", "resp_cor", "cut")], rate = curves$simulated,
                          method = "Simulated"),
               data.frame(curves[, c("panel", "resp_cor", "cut")], rate = curves$approx,
@@ -46,7 +47,7 @@ p <- ggplot(long, aes(cut, rate, colour = resp_cor, linetype = method)) +
   geom_hline(yintercept = 0.025, colour = "grey40", linetype = "dotted") +
   geom_vline(xintercept = stats::qnorm(0.95), colour = "grey40", linetype = "dotted") +
   geom_line(linewidth = 0.5) +
-  facet_wrap(~ panel, nrow = 1) +
+  facet_wrap(~ panel, nrow = 1, labeller = label_parsed) +
   scale_colour_manual(values = pal[c(2, 3, 4)], labels = lab_r, name = NULL) +
   scale_linetype_manual(values = c("solid", "dashed"), name = NULL) +
   labs(x = "Expansion cutpoint c for X", y = "Type I error rate") +

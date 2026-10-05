@@ -5,11 +5,12 @@
 #   source("inst/paper/data_generation/04_win_statistics_simulation.R")
 # Writes inst/paper/data/win_statistics_simulation.rds.
 #
-# Trials: 350 patients per group enrolled uniformly over 24 months, analysed
-# when the number of deaths required by RequiredEvents() in the base case
-# (Corr(PFS, R) = 0.4, kappa = 0.6; one-sided alpha 0.025, power 0.8) has been
-# observed. Endpoints in order of priority: OS, PFS (Gehan scores) and response
-# observed by the analysis cutoff (response timing "ttr", resp.tau 1.5,
+# Trials: 200 patients per group enrolled uniformly over 24 months, analysed
+# at month 30 (fixed calendar time). The sample size is smaller than in the
+# design example (350 per group) so that the power of the win ratio test is
+# not close to 1 and the differences between the simulated power and the
+# formulas remain visible. Endpoints in order of priority: OS, PFS (Gehan
+# scores) and response observed by the analysis cutoff (response timing "ttr", resp.tau 1.5,
 # ttr.median 2.5). The log-rank statistics of OS and PFS and the pooled Z
 # statistic of response at the same cutoff are stored as well.
 # Scenarios: Corr(PFS, R) in {0, 0.2, 0.4, 0.6} by kappa in {1, 0.6}, under
@@ -24,9 +25,8 @@ arms_win <- function(resp.cor, kappa, null) {
                  resp.timing = ttr$resp.timing, resp.tau = ttr$resp.tau,
                  ttr.median = ttr$ttr.median)
 }
-deaths <- RequiredEvents(arms_win(base$resp_cor, base$pps_hr_resp, FALSE),
-                         n = two_group$n, a.time = two_group$a_time, endpoint = "os",
-                         alpha = two_group$alpha, power = two_group$power)$events
+n_win <- c(200, 200)
+analysis_time <- 30
 scen <- expand.grid(resp_cor = c(0, 0.2, 0.4, 0.6), kappa = c(1, 0.6),
                     hypothesis = c("alternative", "null"), stringsAsFactors = FALSE)
 scen$scenario <- seq_len(nrow(scen))
@@ -40,10 +40,9 @@ for (s in seq_len(nrow(scen))) {
   out <- vector("list", nb)
   for (b in seq_len(nb)) {
     m <- min(batch_size, nsim - (b - 1) * batch_size)
-    d <- rOncoEndpoints(nsim = m, n = two_group$n, arms = arms,
+    d <- rOncoEndpoints(nsim = m, n = n_win, arms = arms,
                         a.time = two_group$a_time, seed = seed_of(4, s, b))
-    cutoff <- EventTime(d, deaths, "os")
-    cd <- CutoffData(d, cutoff)
+    cd <- CutoffData(d, analysis_time)
     trt <- cd$group == "Treatment"
     ws <- win_statistics_batch(cd)
     lr_os <- logrank_z(cd$sim, trt, cd$os_tte, cd$os_event)
@@ -54,7 +53,8 @@ for (s in seq_len(nrow(scen))) {
     ws$z_logrank_os <- lr_os$z
     ws$z_logrank_pfs <- lr_pfs$z
     ws$z_orr <- oz$z
-    ws$cutoff <- as.vector(cutoff)
+    ws$cutoff <- analysis_time
+    ws$deaths <- as.vector(tapply(cd$os_event, cd$sim, sum))
     ws$sim <- ws$sim + (b - 1) * batch_size
     out[[b]] <- ws
   }
@@ -65,8 +65,8 @@ for (s in seq_len(nrow(scen))) {
           round((proc.time() - t_start)[["elapsed"]]), " s)")
 }
 
-win_statistics_simulation <- list(results = results, scenarios = scen, deaths = deaths,
-                                  two_group = two_group, ttr = ttr,
+win_statistics_simulation <- list(results = results, scenarios = scen, n = n_win,
+                                  analysis_time = analysis_time, two_group = two_group, ttr = ttr,
                                   info = run_info(t_start, pilot))
 saveRDS(win_statistics_simulation, file.path(data_dir, "win_statistics_simulation.rds"))
 el <- win_statistics_simulation$info$elapsed_sec

@@ -8,7 +8,7 @@
 source(file.path("inst", "paper", "figures_and_tables", "settings.R"))
 src <- "win_statistics_simulation.rds"
 ws <- readRDS(file.path(data_dir, src))
-n_tot <- sum(ws$two_group$n)
+n_tot <- sum(ws$n)
 sm <- do.call(rbind, lapply(ws$results, function(r) {
   data.frame(r$scenario[, c("resp_cor", "kappa", "hypothesis")],
              t(win_summary(r$stats, n_tot, alpha = ws$two_group$alpha)))

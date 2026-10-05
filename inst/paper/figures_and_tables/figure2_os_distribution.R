@@ -9,48 +9,56 @@ source(file.path("inst", "paper", "figures_and_tables", "settings.R"))
 src <- "model_quantities.rds"
 f2 <- readRDS(file.path(data_dir, src))$fig2
 cv <- f2$curves
-lab <- c(idm_kappa1 = "OS, illness-death, \u03ba = 1",
-         idm_kappa06 = "OS, illness-death, \u03ba = 0.6",
-         exponential_os = "OS, exponential (exp-exp model)",
-         pfs = "PFS")
+lev <- c("idm_kappa1", "idm_kappa06", "exponential_os", "pfs")
+lab <- expression(paste("OS, illness-death, ", kappa == 1),
+                  paste("OS, illness-death, ", kappa == 0.6),
+                  "OS, exponential (exp-exp model)",
+                  "PFS")
 # the exp-exp OS distribution is the exponential distribution with the same
-# median, so only the latter is drawn
-d <- cv[cv$model %in% names(lab), ]
-d$model <- factor(d$model, levels = names(lab))
+# median, so only the latter is drawn; panel (b) shows the hazards of the same
+# four distributions so that (a) and (b) share one legend
+d <- cv[cv$model %in% lev, ]
+d$model <- factor(d$model, levels = lev)
 cols <- pal[c(2, 3, 1, 4)]
 ltys <- c("solid", "longdash", "dashed", "dotted")
+leg <- theme(legend.position = "bottom", legend.text = element_text(size = 7, hjust = 0),
+             legend.key.height = unit(9, "pt"), legend.key.width = unit(18, "pt"),
+             legend.key.spacing.y = unit(1, "pt"))
 p_a <- ggplot(d, aes(t, surv, colour = model, linetype = model)) +
   geom_line(linewidth = 0.6) +
-  scale_colour_manual(values = cols, labels = lab, name = NULL) +
-  scale_linetype_manual(values = ltys, labels = lab, name = NULL) +
+  scale_colour_manual(values = cols, breaks = lev, labels = lab, name = NULL) +
+  scale_linetype_manual(values = ltys, breaks = lev, labels = lab, name = NULL) +
   scale_x_continuous(breaks = seq(0, 48, 12)) +
+  guides(colour = guide_legend(ncol = 2), linetype = guide_legend(ncol = 2)) +
   labs(x = "Months", y = "Survival probability") +
-  theme_paper + theme(legend.position = "inside", legend.position.inside = c(0.62, 0.8),
-                      legend.text = element_text(size = 7))
-p_b <- ggplot(d[d$model != "pfs", ], aes(t, hazard, colour = model, linetype = model)) +
+  theme_paper + leg
+p_b <- ggplot(d, aes(t, hazard, colour = model, linetype = model)) +
   geom_line(linewidth = 0.6) +
-  scale_colour_manual(values = cols[1:3], labels = lab[1:3], name = NULL) +
-  scale_linetype_manual(values = ltys[1:3], labels = lab[1:3], name = NULL) +
+  scale_colour_manual(values = cols, breaks = lev, labels = lab, name = NULL) +
+  scale_linetype_manual(values = ltys, breaks = lev, labels = lab, name = NULL) +
   scale_x_continuous(breaks = seq(0, 48, 12)) +
   coord_cartesian(ylim = c(0, NA)) +
-  labs(x = "Months", y = "OS hazard (per month)") +
-  theme_paper + theme(legend.position = "inside", legend.position.inside = c(0.6, 0.2),
-                      legend.text = element_text(size = 7))
+  guides(colour = guide_legend(ncol = 2), linetype = guide_legend(ncol = 2)) +
+  labs(x = "Months", y = "Hazard (per month)") +
+  theme_paper + leg
 hr <- f2$hr
-hr$kappa <- factor(hr$kappa, levels = c(1, 0.6, 0.3))
-lab_k <- c("1" = "\u03ba = 1", "0.6" = "\u03ba = 0.6", "0.3" = "\u03ba = 0.3")
+lev_k <- c("1", "0.6", "0.3")
+hr$kappa <- factor(hr$kappa, levels = lev_k)
+lab_k <- expression(kappa == 1, kappa == 0.6, kappa == 0.3)
 p_c <- ggplot(hr, aes(t, hr_os, colour = kappa, linetype = kappa)) +
   geom_line(linewidth = 0.6) +
   geom_hline(yintercept = f2$hr_pfs, colour = "grey40", linetype = "dotted") +
-  scale_colour_manual(values = pal[c(2, 3, 5)], labels = lab_k, name = NULL) +
-  scale_linetype_manual(values = c("solid", "longdash", "dotdash"), labels = lab_k, name = NULL) +
+  scale_colour_manual(values = pal[c(2, 3, 5)], breaks = lev_k, labels = lab_k, name = NULL) +
+  scale_linetype_manual(values = c("solid", "longdash", "dotdash"), breaks = lev_k,
+                        labels = lab_k, name = NULL) +
   scale_x_continuous(breaks = seq(0, 48, 12)) +
   labs(x = "Months", y = "OS hazard ratio") +
-  theme_paper + theme(legend.position = "inside", legend.position.inside = c(0.75, 0.2),
-                      legend.text = element_text(size = 7))
-p <- (p_a | p_b | p_c) +
-  plot_annotation(tag_levels = "a", tag_prefix = "(", tag_suffix = ")")
-save_figure(p, "figure2_os_distribution", width = fig_width, height = 2.8)
+  theme_paper + leg
+p <- (((p_a | p_b) + plot_layout(guides = "collect")) | p_c) +
+  plot_layout(widths = c(2, 1)) +
+  plot_annotation(tag_levels = "a", tag_prefix = "(", tag_suffix = ")") &
+  theme(legend.position = "bottom")
+save_figure(p, "figure2_os_distribution", width = fig_width, height = 3.3)
 
 # numbers
 tt <- c(0, 6, 12, 24, 36, 48)

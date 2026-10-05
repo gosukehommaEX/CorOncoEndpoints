@@ -13,18 +13,22 @@ f3 <- readRDS(file.path(data_dir, src))$fig3
 d <- f3$cor
 kap <- sort(unique(d$kappa))
 d$kappa <- factor(d$kappa, levels = kap)
-lab_k <- setNames(paste0("\u03ba = ", kap), kap)
+lab_k <- parse(text = paste0("kappa == ", kap))
+leg <- theme(legend.position = "bottom", legend.text = element_text(size = 7, hjust = 0),
+             legend.key.height = unit(9, "pt"), legend.key.width = unit(18, "pt"),
+             legend.key.spacing.y = unit(1, "pt"))
 p_a <- ggplot(d, aes(resp_cor, cor.os.resp, colour = kappa, linetype = kappa)) +
   geom_abline(intercept = 0, slope = 1, colour = "grey40", linetype = "dotted") +
   geom_line(aes(linewidth = kappa == 1)) +
   scale_linewidth_manual(values = c(0.5, 1.0), guide = "none") +
-  scale_colour_manual(values = pal[c(3, 6, 4, 1, 2, 5)], labels = lab_k, name = NULL) +
+  scale_colour_manual(values = pal[c(3, 6, 4, 1, 2, 5)], breaks = levels(d$kappa),
+                      labels = lab_k, name = NULL) +
   scale_linetype_manual(values = c("solid", "longdash", "dashed", "solid", "dotdash", "twodash"),
-                        labels = lab_k, name = NULL) +
+                        breaks = levels(d$kappa), labels = lab_k, name = NULL) +
+  guides(colour = guide_legend(nrow = 2), linetype = guide_legend(nrow = 2)) +
   coord_cartesian(xlim = c(0, 0.75), ylim = c(-0.2, 0.75)) +
   labs(x = "Corr(PFS, R)", y = "Corr(OS, R)") +
-  theme_paper + theme(legend.position = "inside", legend.position.inside = c(0.2, 0.75),
-                      legend.text = element_text(size = 7))
+  theme_paper + leg
 b <- f3$bounds
 db <- rbind(data.frame(orr = b$orr[b$resp_tau == 0], v = b$upper[b$resp_tau == 0], s = "upper"),
             data.frame(orr = b$orr[b$resp_tau == 0], v = b$lower[b$resp_tau == 0], s = "lower0"),
@@ -33,18 +37,18 @@ db <- rbind(data.frame(orr = b$orr[b$resp_tau == 0], v = b$upper[b$resp_tau == 0
 db <- db[!is.na(db$v), ]
 lab_b <- c(upper = "Upper bound",
            lower0 = "Lower bound, no landmark",
-           lower15 = "Lower bound, landmark 1.5 months (PFS median 6)")
+           lower15 = "Lower bound, landmark at 1.5 months")
 db$s <- factor(db$s, levels = names(lab_b))
 p_b <- ggplot(db, aes(orr, v, colour = s, linetype = s)) +
   geom_hline(yintercept = 0, colour = "grey40", linetype = "dotted") +
   geom_line(linewidth = 0.6) +
   scale_colour_manual(values = pal[c(1, 2, 3)], labels = lab_b, name = NULL) +
   scale_linetype_manual(values = c("solid", "dashed", "longdash"), labels = lab_b, name = NULL) +
+  guides(colour = guide_legend(ncol = 1), linetype = guide_legend(ncol = 1)) +
   labs(x = "Response rate", y = "Attainable Corr(PFS, R)") +
-  theme_paper + theme(legend.position = "inside", legend.position.inside = c(0.55, 0.5),
-                      legend.text = element_text(size = 7))
+  theme_paper + leg
 p <- (p_a | p_b) + plot_annotation(tag_levels = "a", tag_prefix = "(", tag_suffix = ")")
-save_figure(p, "figure3_correlations", width = fig_width, height = 3.2)
+save_figure(p, "figure3_correlations", width = fig_width, height = 3.5)
 
 # numbers
 pick <- function(k, r) d$cor.os.resp[d$kappa == k & abs(d$resp_cor - r) < 1e-9]

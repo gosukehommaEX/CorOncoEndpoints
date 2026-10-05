@@ -10,50 +10,54 @@ src <- "model_quantities.rds"
 f1 <- readRDS(file.path(data_dir, src))$fig1
 cv <- f1$curves
 
-lab_a <- c(markov = "Post-progression, Markov model with constant pre-progression hazard",
-           expexp = "Post-progression, exp-exp model",
-           expexp_h02 = "Pre-progression death, exp-exp model",
-           const_h02 = "Pre-progression death, constant",
-           idm = "Post-progression, illness-death model (\u03ba = 1)")
+lab_a <- expression(paste(h[12](t), ": Markov model, constant ", h[02]),
+                    paste(h[12](t), ": exp-exp model"),
+                    paste(h[02](t), ": exp-exp model"),
+                    paste(h[02], " = ", pi, lambda[P], ": constant"),
+                    paste(gamma[0], ": illness-death model (", kappa == 1, ")"))
+lev_a <- c("markov", "expexp", "expexp_h02", "const_h02", "idm")
 da <- rbind(data.frame(t = cv$t, h = cv$markov_h12, s = "markov"),
             data.frame(t = cv$t, h = cv$expexp_h12, s = "expexp"),
             data.frame(t = cv$t, h = cv$expexp_h02, s = "expexp_h02"),
             data.frame(t = cv$t, h = cv$markov_h02, s = "const_h02"),
             data.frame(t = cv$t, h = f1$gam0_idm, s = "idm"))
-da$s <- factor(da$s, levels = names(lab_a))
+da$s <- factor(da$s, levels = lev_a)
 ylim <- c(0.004, 30)
 brk <- c(0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30)
+leg <- theme(legend.position = "inside", legend.position.inside = c(0.99, 0.99),
+             legend.justification = c(1, 1), legend.text = element_text(size = 7, hjust = 0),
+             legend.key.height = unit(9, "pt"), legend.key.width = unit(18, "pt"),
+             legend.key.spacing.y = unit(1, "pt"))
 p_a <- ggplot(da, aes(t, h, colour = s, linetype = s)) +
   geom_line(linewidth = 0.6) +
   geom_hline(yintercept = f1$lam_o, colour = "grey40", linetype = "dotted") +
   scale_y_log10(breaks = brk, labels = format(brk, drop0trailing = TRUE)) +
   coord_cartesian(ylim = ylim) +
-  scale_colour_manual(values = pal[c(3, 2, 2, 1, 4)], labels = lab_a, name = NULL) +
+  scale_colour_manual(values = pal[c(3, 2, 2, 1, 4)], breaks = lev_a, labels = lab_a, name = NULL) +
   scale_linetype_manual(values = c("solid", "solid", "dashed", "dashed", "dotdash"),
-                        labels = lab_a, name = NULL) +
+                        breaks = lev_a, labels = lab_a, name = NULL) +
   labs(x = "Months since randomization", y = "Hazard (per month)") +
-  guides(colour = guide_legend(ncol = 1), linetype = guide_legend(ncol = 1)) +
-  theme_paper + theme(legend.position = "bottom", legend.text = element_text(size = 7))
+  theme_paper + leg
 
 db <- rbind(data.frame(t = cv$t, h = cv$gumbel_h12, s = "gumbel"),
             data.frame(t = cv$t, h = f1$h02_const, s = "const_h02"))
-lab_b <- c(gumbel = "Just after progression, Gumbel latent-time model",
-           const_h02 = "Pre-progression death")
-db$s <- factor(db$s, levels = names(lab_b))
+lev_b <- c("gumbel", "const_h02")
+lab_b <- expression(paste("Just after progression at ", s, ": Gumbel latent-time model"),
+                    paste(h[02], " = ", pi, lambda[P]))
+db$s <- factor(db$s, levels = lev_b)
 p_b <- ggplot(db, aes(t, h, colour = s, linetype = s)) +
   geom_line(linewidth = 0.6) +
   geom_hline(yintercept = f1$lam_o, colour = "grey40", linetype = "dotted") +
   scale_y_log10(breaks = brk, labels = format(brk, drop0trailing = TRUE)) +
   coord_cartesian(ylim = ylim) +
-  scale_colour_manual(values = pal[c(5, 1)], labels = lab_b, name = NULL) +
-  scale_linetype_manual(values = c("solid", "dashed"), labels = lab_b, name = NULL) +
-  labs(x = "Month of progression", y = "Hazard (per month)") +
-  guides(colour = guide_legend(ncol = 1), linetype = guide_legend(ncol = 1)) +
-  theme_paper + theme(legend.position = "bottom", legend.text = element_text(size = 7))
+  scale_colour_manual(values = pal[c(5, 1)], breaks = lev_b, labels = lab_b, name = NULL) +
+  scale_linetype_manual(values = c("solid", "dashed"), breaks = lev_b, labels = lab_b, name = NULL) +
+  labs(x = expression(paste("Month of progression, ", s)), y = "Hazard (per month)") +
+  theme_paper + leg
 
-p <- (p_a | p_b) + plot_layout(widths = c(1.15, 1)) +
+p <- (p_a | p_b) +
   plot_annotation(tag_levels = "a", tag_prefix = "(", tag_suffix = ")")
-save_figure(p, "figure1_expexp_hazards", width = fig_width, height = 4.2)
+save_figure(p, "figure1_expexp_hazards", width = fig_width, height = 3.2)
 
 tt <- c(0.1, 1, 6, 12, 24)
 write_numbers(

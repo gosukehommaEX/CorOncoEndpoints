@@ -30,7 +30,7 @@ p <- ggplot(d, aes(cut, v, colour = factor(resp_cor), linetype = factor(kappa)))
   geom_line(linewidth = 0.5) +
   facet_wrap(~ measure, nrow = 1, scales = "free_y") +
   scale_colour_manual(values = pal[c(2, 3, 4)], name = "Corr(PFS, R)") +
-  scale_linetype_manual(values = c("dashed", "solid"), name = "\u03ba") +
+  scale_linetype_manual(values = c("dashed", "solid"), name = expression(kappa)) +
   labs(x = "Expansion cutpoint c for X", y = NULL) +
   theme_paper + theme(legend.position = "bottom")
 save_figure(p, "figureS3_two_in_one_alternative", width = fig_width, height = 3.0)

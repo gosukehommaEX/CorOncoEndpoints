@@ -35,5 +35,6 @@ win_summary <- function(st, n, alpha = 0.025) {
                                alpha = alpha, measure = "wr"),
     power_wo_indep = win_power(ind[["p_win"]], ind[["p_loss"]], ind[["p_tie"]], n,
                                alpha = alpha, measure = "wo"),
-    nsim = nrow(st), mean_cutoff = mean(st$cutoff))
+    nsim = nrow(st), mean_cutoff = mean(st$cutoff),
+    mean_deaths = if (is.null(st$deaths)) NA_real_ else mean(st$deaths))
 }
