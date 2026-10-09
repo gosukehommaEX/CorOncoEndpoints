@@ -42,7 +42,10 @@ p_a <- ggplot(da, aes(t, h, colour = s, linetype = s)) +
 db <- rbind(data.frame(t = cv$t, h = cv$gumbel_h12, s = "gumbel"),
             data.frame(t = cv$t, h = f1$h02_const, s = "const_h02"))
 lev_b <- c("gumbel", "const_h02")
-lab_b <- expression(paste("Just after progression at ", s, ": Gumbel latent-time model"),
+# the first label is split into two lines (atop) so that the legend fits in the
+# panel; displaystyle keeps both lines at the normal size
+lab_b <- expression(displaystyle(atop(paste("Just after progression at ", s, ":"),
+                                      "Gumbel latent-time model")),
                     paste(h["02"], " = ", pi, lambda[P]))
 db$s <- factor(db$s, levels = lev_b)
 p_b <- ggplot(db, aes(t, h, colour = s, linetype = s)) +

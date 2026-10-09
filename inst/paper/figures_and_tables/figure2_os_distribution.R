@@ -16,26 +16,30 @@ lab <- expression(paste("OS, illness-death, ", kappa == 1),
                   "PFS")
 # the exp-exp OS distribution is the exponential distribution with the same
 # median, so only the latter is drawn; panel (b) shows the hazards of the same
-# four distributions so that (a) and (b) share one legend
+# four distributions so that (a) and (b) share one legend. The legend titles
+# name the panels to which each legend refers.
 d <- cv[cv$model %in% lev, ]
 d$model <- factor(d$model, levels = lev)
 cols <- pal[c(2, 3, 1, 4)]
 ltys <- c("solid", "longdash", "dashed", "dotted")
 leg <- theme(legend.position = "bottom", legend.text = element_text(size = 7, hjust = 0),
+             legend.title = element_text(size = 7, face = "bold"),
+             legend.title.position = "top",
              legend.key.height = unit(9, "pt"), legend.key.width = unit(18, "pt"),
              legend.key.spacing.y = unit(1, "pt"))
+leg_ab <- "Panels (a) and (b)"
 p_a <- ggplot(d, aes(t, surv, colour = model, linetype = model)) +
   geom_line(linewidth = 0.6) +
-  scale_colour_manual(values = cols, breaks = lev, labels = lab, name = NULL) +
-  scale_linetype_manual(values = ltys, breaks = lev, labels = lab, name = NULL) +
+  scale_colour_manual(values = cols, breaks = lev, labels = lab, name = leg_ab) +
+  scale_linetype_manual(values = ltys, breaks = lev, labels = lab, name = leg_ab) +
   scale_x_continuous(breaks = seq(0, 48, 12)) +
   guides(colour = guide_legend(ncol = 2), linetype = guide_legend(ncol = 2)) +
   labs(x = "Months", y = "Survival probability") +
   theme_paper + leg
 p_b <- ggplot(d, aes(t, hazard, colour = model, linetype = model)) +
   geom_line(linewidth = 0.6) +
-  scale_colour_manual(values = cols, breaks = lev, labels = lab, name = NULL) +
-  scale_linetype_manual(values = ltys, breaks = lev, labels = lab, name = NULL) +
+  scale_colour_manual(values = cols, breaks = lev, labels = lab, name = leg_ab) +
+  scale_linetype_manual(values = ltys, breaks = lev, labels = lab, name = leg_ab) +
   scale_x_continuous(breaks = seq(0, 48, 12)) +
   coord_cartesian(ylim = c(0, NA)) +
   guides(colour = guide_legend(ncol = 2), linetype = guide_legend(ncol = 2)) +
@@ -48,9 +52,10 @@ lab_k <- expression(kappa == 1, kappa == 0.6, kappa == 0.3)
 p_c <- ggplot(hr, aes(t, hr_os, colour = kappa, linetype = kappa)) +
   geom_line(linewidth = 0.6) +
   geom_hline(yintercept = f2$hr_pfs, colour = "grey40", linetype = "dotted") +
-  scale_colour_manual(values = pal[c(2, 3, 5)], breaks = lev_k, labels = lab_k, name = NULL) +
+  scale_colour_manual(values = pal[c(2, 3, 5)], breaks = lev_k, labels = lab_k,
+                      name = "Panel (c)") +
   scale_linetype_manual(values = c("solid", "longdash", "dotdash"), breaks = lev_k,
-                        labels = lab_k, name = NULL) +
+                        labels = lab_k, name = "Panel (c)") +
   scale_x_continuous(breaks = seq(0, 48, 12)) +
   labs(x = "Months", y = "OS hazard ratio") +
   theme_paper + leg
