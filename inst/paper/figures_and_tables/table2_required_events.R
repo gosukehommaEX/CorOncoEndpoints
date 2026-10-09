@@ -55,8 +55,10 @@ notes <- c(paste0(tg$n[1], " patients per group enrolled uniformly over ", tg$a_
                   "$\\mathrm{Corr}(\\mathrm{PFS}, R) = 0.40$, OS median 15 months. Experimental ",
                   "group: PFS hazard ratio 0.7 and response rate 0.45, with the same ",
                   "post-progression hazards. Exp--exp: both groups with exponential PFS and OS. ",
-                  "Analysis times are in months from the start of enrolment. PFS rows are the ",
-                  "same in all scenarios and are shown once. MCSE, Monte Carlo standard error."),
+                  "Analysis times are in months from the start of enrolment. The hazard ratio, ",
+                  "number of events and expected analysis time of PFS are the same in all ",
+                  "scenarios, and PFS is shown for the first scenario only. MCSE, Monte Carlo ",
+                  "standard error."),
            "[a] More events than patients; not attainable.")
 write_table_tex("table2_required_events", caption = caption, label = "tab:events",
                 align = "p{2.1cm}p{2.4cm}rrrrr", header = header, body = body, notes = notes,

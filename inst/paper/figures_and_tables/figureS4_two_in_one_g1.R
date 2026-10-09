@@ -3,7 +3,8 @@
 # cutpoint
 #
 # Reads inst/paper/data/two_in_one_simulation.rds. Writes
-# inst/paper/output/figures/figureS4_two_in_one_g1.eps and .pdf.
+# inst/paper/output/figures/figureS4_two_in_one_g1.eps and .pdf and
+# inst/paper/output/numbers/figureS4_two_in_one_g1.csv.
 
 source(file.path("inst", "paper", "figures_and_tables", "settings.R"))
 sim <- readRDS(file.path(data_dir, "two_in_one_simulation.rds"))
@@ -30,3 +31,17 @@ p <- ggplot(d, aes(cut, rate, colour = factor(resp_cor))) +
   labs(x = "Expansion cutpoint c for X", y = "Familywise type I error rate") +
   theme_paper + theme(legend.position = "bottom")
 save_figure(p, "figureS4_two_in_one_g1", width = fig_width, height = 3.0)
+
+# numbers: largest familywise type I error rate over the cutpoints
+grp <- split(d, list(d$type, d$resp_cor, d$kappa), drop = TRUE)
+mx <- do.call(rbind, lapply(grp, function(x) {
+  data.frame(lab = paste0(x$type[1], "_cor", x$resp_cor[1], "_kappa", x$kappa[1]),
+             max_rate = max(x$rate), max_cut = x$cut[which.max(x$rate)],
+             stringsAsFactors = FALSE)
+}))
+write_numbers("figureS4_two_in_one_g1",
+              key = c(paste0("max_rate_", mx$lab), paste0("max_cut_", mx$lab)),
+              value = c(mx$max_rate, mx$max_cut),
+              description = c(paste0("largest familywise type I error rate over c, ", mx$lab),
+                              paste0("cutpoint of the largest rate, ", mx$lab)),
+              source = "two_in_one_simulation.rds")
