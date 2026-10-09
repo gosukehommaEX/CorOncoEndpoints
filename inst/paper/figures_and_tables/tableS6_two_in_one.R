@@ -67,7 +67,7 @@ write_table_tex("tableS6_two_in_one",
                                format(sm$nsim[sm$type == "N1"][1], big.mark = ","), " trials per null ",
                                "scenario and ", format(sm$nsim[sm$type == "A"][1], big.mark = ","),
                                " per alternative scenario."),
-                size = "\\footnotesize")
+                size = "\\footnotesize\\setlength{\\tabcolsep}{3pt}")
 vars <- setdiff(names(sm), c("scenario", "type", "resp_cor", "kappa"))
 lab <- paste0(sm$type, "_cor", sm$resp_cor, "_kappa", sm$kappa)
 write_numbers("tableS6_two_in_one",

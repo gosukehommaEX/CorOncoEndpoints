@@ -59,7 +59,7 @@ write_table_tex("tableS7_win_statistics",
                                "proportions and with the proportions computed as if the ",
                                "endpoints were independent. ", format(sm$nsim[1], big.mark = ","),
                                " trials per scenario."),
-                size = "\\scriptsize\\setlength{\\tabcolsep}{3pt}")
+                size = "\\scriptsize\\setlength{\\tabcolsep}{2pt}")
 vars <- setdiff(names(sm), c("resp_cor", "kappa", "hypothesis"))
 lab <- paste0(sm$hypothesis, "_cor", sm$resp_cor, "_kappa", sm$kappa)
 write_numbers("tableS7_win_statistics",
