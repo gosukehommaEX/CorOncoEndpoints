@@ -10,11 +10,18 @@ src <- "model_quantities.rds"
 f1 <- readRDS(file.path(data_dir, src))$fig1
 cv <- f1$curves
 
-lab_a <- expression(paste(h["12"](t), ": Markov model, constant ", h["02"]),
-                    paste(h["12"](t), ": exp-exp model"),
-                    paste(h["02"](t), ": exp-exp model"),
-                    paste(h["02"], " = ", pi, lambda[P], ": constant"),
-                    paste(gamma[0], ": illness-death model (", kappa == 1, ")"))
+# Legend labels: "(t)" is written as text, because the parentheses of the
+# plotmath call h(t) are drawn taller than ordinary text and shift the label
+# against its key. Every label ends with the invisible strut
+# phantom(""[0] * "("), so that all labels have the same height and depth and
+# are centred on their keys in the same way.
+lab_a <- expression(paste(h["12"], "(t): Markov model, constant ", h["02"],
+                          phantom(""[0] * "(")),
+                    paste(h["12"], "(t): exp-exp model", phantom(""[0] * "(")),
+                    paste(h["02"], "(t): exp-exp model", phantom(""[0] * "(")),
+                    paste(h["02"], " = ", pi, lambda[P], ": constant", phantom(""[0] * "(")),
+                    paste(gamma[0], ": illness-death model (", kappa == 1, ")",
+                          phantom(""[0] * "(")))
 lev_a <- c("markov", "expexp", "expexp_h02", "const_h02", "idm")
 da <- rbind(data.frame(t = cv$t, h = cv$markov_h12, s = "markov"),
             data.frame(t = cv$t, h = cv$expexp_h12, s = "expexp"),
@@ -42,11 +49,11 @@ p_a <- ggplot(da, aes(t, h, colour = s, linetype = s)) +
 db <- rbind(data.frame(t = cv$t, h = cv$gumbel_h12, s = "gumbel"),
             data.frame(t = cv$t, h = f1$h02_const, s = "const_h02"))
 lev_b <- c("gumbel", "const_h02")
-# the first label is split into two lines (atop) so that the legend fits in the
-# panel; displaystyle keeps both lines at the normal size
-lab_b <- expression(displaystyle(atop(paste("Just after progression at ", s, ":"),
-                                      "Gumbel latent-time model")),
-                    paste(h["02"], " = ", pi, lambda[P]))
+# one line per label, so that each label is centred on its key; that the curve
+# is the hazard just after a progression at month s is stated by the axis
+# label and the caption
+lab_b <- expression(paste("Gumbel latent-time model", phantom(""[0] * "(")),
+                    paste(h["02"], " = ", pi, lambda[P], phantom(""[0] * "(")))
 db$s <- factor(db$s, levels = lev_b)
 p_b <- ggplot(db, aes(t, h, colour = s, linetype = s)) +
   geom_line(linewidth = 0.6) +
