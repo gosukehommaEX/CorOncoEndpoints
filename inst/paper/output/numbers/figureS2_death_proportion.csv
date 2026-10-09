@@ -3,3 +3,7 @@
 "figureS2_death_proportion","cor_pfs_os_kappa1_pi0.4",0.4,"Corr(PFS, OS), kappa 1 death proportion 0.4","model_quantities.rds"
 "figureS2_death_proportion","cor_pfs_os_kappa06_pi0.02",0.668481504150835,"Corr(PFS, OS), kappa 0.6 death proportion 0.02","model_quantities.rds"
 "figureS2_death_proportion","cor_pfs_os_kappa06_pi0.4",0.406208053385775,"Corr(PFS, OS), kappa 0.6 death proportion 0.4","model_quantities.rds"
+"figureS2_death_proportion","spearman_pfs_os_kappa1_pi0.02",0.643040827718829,"Spearman correlation of PFS and OS (simulated), kappa 1 death proportion 0.02","model_quantities.rds"
+"figureS2_death_proportion","spearman_pfs_os_kappa1_pi0.4",0.500707179393478,"Spearman correlation of PFS and OS (simulated), kappa 1 death proportion 0.4","model_quantities.rds"
+"figureS2_death_proportion","spearman_pfs_os_kappa1_max",0.643040827718829,"largest Spearman correlation of PFS and OS (simulated), kappa 1, death proportion 0.02 to 0.40","model_quantities.rds"
+"figureS2_death_proportion","spearman_n",1e+06,"number of simulated patients for each Spearman correlation","model_quantities.rds"

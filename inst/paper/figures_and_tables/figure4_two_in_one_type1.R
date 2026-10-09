@@ -6,10 +6,12 @@
 # inst/paper/output/figures/figure4_two_in_one_type1.eps and .pdf and
 # inst/paper/output/numbers/figure4_two_in_one_type1.csv.
 #
-# Approximation: with X ~ N(mu_X, 1), P(success) = P(Y > w) - P(X >= c, Y > w)
-# + P(X >= c, Z > w), where (X, Y) and (X, Z) are bivariate normal with the
-# simulated correlations, w = z_{0.975}, Y = Y_PFS, Z = Z_OS and mu_X is the
-# simulated mean of X.
+# Approximation: with X ~ N(mu_X, 1), P(success) = p_Y - P(X >= c, Y > w_Y)
+# + P(X >= c, Z > w_Z), where (X, Y) and (X, Z) are bivariate normal with the
+# simulated correlations, Y = Y_PFS, Z = Z_OS, mu_X is the simulated mean of X,
+# p_Y and p_Z are the simulated rejection rates of Y and Z alone at z_{0.975},
+# and w_Y = qnorm(1 - p_Y) and w_Z = qnorm(1 - p_Z), so that the approximation
+# equals p_Y as c tends to infinity and p_Z as c tends to minus infinity.
 
 source(file.path("inst", "paper", "figures_and_tables", "settings.R"))
 src <- "two_in_one_simulation.rds"
@@ -23,13 +25,16 @@ curves <- do.call(rbind, lapply(null_ids, function(s) {
   r_xy <- stats::cor(st$x, st$y_pfs)
   r_xz <- stats::cor(st$x, st$z_os)
   mu <- mean(st$x)
+  p_y <- mean(st$y_pfs > z_975)
+  p_z <- mean(st$z_os > z_975)
   sim_rate <- vapply(cuts, function(cc) mean(two_in_one_rules(st, cc, "chen")), numeric(1))
   approx <- vapply(cuts, function(cc) {
-    0.025 - bvn(cc - mu, z_975, r_xy) + bvn(cc - mu, z_975, r_xz)
+    p_y - bvn(cc - mu, stats::qnorm(1 - p_y), r_xy) +
+      bvn(cc - mu, stats::qnorm(1 - p_z), r_xz)
   }, numeric(1))
   data.frame(scenario = s, type = sc$type, resp_cor = sc$resp_cor, kappa = sc$kappa,
              cut = cuts, simulated = sim_rate, approx = approx, r_xy = r_xy, r_xz = r_xz,
-             mu_x = mu, nsim = nrow(st))
+             mu_x = mu, p_y = p_y, p_z = p_z, nsim = nrow(st))
 }))
 curves$panel <- factor(ifelse(curves$type == "N2", "paste('Response effect only, ', kappa == 1)",
                               paste0("paste('Global null, ', kappa == ", curves$kappa, ")")),
@@ -56,7 +61,9 @@ p <- ggplot(long, aes(cut, rate, colour = resp_cor, linetype = method)) +
 save_figure(p, "figure4_two_in_one_type1", width = fig_width, height = 3.4)
 
 # numbers: correlations, mean of X and rates at c = 1.645 and the maximum
-# over the cutpoints
+# over the cutpoints; rejection rates of Y and Z alone; largest excess of the
+# simulated rate over the largest of 0.025, p_Y and p_Z; largest absolute
+# difference between the simulated and approximated rates
 c0 <- stats::qnorm(0.95)
 one <- do.call(rbind, lapply(null_ids, function(s) {
   cs <- curves[curves$scenario == s, ]
@@ -64,13 +71,19 @@ one <- do.call(rbind, lapply(null_ids, function(s) {
   data.frame(scenario = s, r_xy = cs$r_xy[1], r_xz = cs$r_xz[1], mu_x = cs$mu_x[1],
              rate_c0 = mean(two_in_one_rules(st, c0, "chen")),
              max_sim = max(cs$simulated), max_sim_cut = cs$cut[which.max(cs$simulated)],
-             max_approx = max(cs$approx), nsim = nrow(st))
+             max_approx = max(cs$approx), rate_y = cs$p_y[1], rate_z = cs$p_z[1],
+             max_excess = max(cs$simulated - max(0.025, cs$p_y[1], cs$p_z[1])),
+             max_abs_diff = max(abs(cs$simulated - cs$approx)), nsim = nrow(st))
 }))
 lab_s <- with(sim$scenarios[null_ids, ], paste0(type, "_cor", resp_cor, "_kappa", kappa))
-vars <- c("r_xy", "r_xz", "mu_x", "rate_c0", "max_sim", "max_sim_cut", "max_approx", "nsim")
+vars <- c("r_xy", "r_xz", "mu_x", "rate_c0", "max_sim", "max_sim_cut", "max_approx", "rate_y",
+          "rate_z", "max_excess", "max_abs_diff", "nsim")
 desc <- c("correlation of X and Y_PFS", "correlation of X and Z_OS", "mean of X",
           "simulated type I error rate at c = 1.645", "largest simulated rate over c",
           "cutpoint of the largest simulated rate", "largest approximated rate over c",
+          "rejection rate of Y_PFS alone", "rejection rate of Z_OS alone",
+          "largest excess of the simulated rate over max(0.025, Y_PFS alone, Z_OS alone)",
+          "largest absolute difference between the simulated and approximated rates",
           "number of simulated trials")
 write_numbers("figure4_two_in_one_type1",
               key = as.vector(outer(vars, lab_s, paste, sep = "_")),

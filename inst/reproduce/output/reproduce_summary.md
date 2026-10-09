@@ -29,6 +29,6 @@ PASS: 18, EXPLAINED: 1, FAIL: 0, INFO: 1
 
 ## Reasons
 
-- Fleischer et al. (2009), Example 2: expected OS events at 47 months, model with death proportion 1/3: The paper gives the accrual as 45 patients per month with a total accrual time of approx. 29 months. With exactly 1300 / 45 months the expected number is 1198.3; with 29 months and 1305 patients it is 1202.1. The published 1201 lies between, and the exponential case above differs in the same direction.
-- Fleischer et al. (2009), Example 2: power of the log-rank test at 1201 events (88.7%): The paper does not state how the power was computed. The Schoenfeld formula with the hazard ratio 9/10.6 gives 0.809 at 1201 events.
+- Fleischer et al. (2009), Example 2: expected OS events at 47 months, model with death proportion 1/3: Fleischer et al. give the accrual as 45 patients per month with a total accrual time of approx. 29 months. With exactly 1300 / 45 months the expected number is 1198.3; with 29 months and 1305 patients it is 1202.1. The published 1201 lies between, and the exponential case above differs in the same direction.
+- Fleischer et al. (2009), Example 2: power of the log-rank test at 1201 events (88.7%): Fleischer et al. do not state how the power was computed. The Schoenfeld formula with the hazard ratio 9/10.6 gives 0.809 at 1201 events.
 

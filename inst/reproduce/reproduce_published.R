@@ -85,14 +85,14 @@ e_mod29 <- ExpectedEvents(arms_mod, n = c(652.5, 652.5), a.time = c(0, 29),
 add(src, "Example 2: expected OS events at 47 months, exponential OS", 1147, e_exp, 1)
 add(src, "Example 2: expected OS events at 47 months, model with death proportion 1/3",
     1201, e_mod, 1,
-    reason = paste0("The paper gives the accrual as 45 patients per month with a total ",
+    reason = paste0("Fleischer et al. give the accrual as 45 patients per month with a total ",
                     "accrual time of approx. 29 months. With exactly 1300 / 45 months the ",
                     "expected number is ", sprintf("%.1f", e_mod), "; with 29 months and ",
                     "1305 patients it is ", sprintf("%.1f", e_mod29), ". The published ",
                     "1201 lies between, and the exponential case above differs in the ",
                     "same direction."))
 add(src, "Example 2: power of the log-rank test at 1201 events (88.7%)", 0.887, NA, NA,
-    reason = paste0("The paper does not state how the power was computed. The Schoenfeld ",
+    reason = paste0("Fleischer et al. do not state how the power was computed. The Schoenfeld ",
                     "formula with the hazard ratio 9/10.6 gives ",
                     sprintf("%.3f", pnorm(sqrt(1201) * abs(log(9 / 10.6)) / 2 -
                                             qnorm(0.975))),

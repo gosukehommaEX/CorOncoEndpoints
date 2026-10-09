@@ -1,9 +1,11 @@
-# Model quantities computed without simulation (Figures 1 to 3, Table 1,
-# Figures S1 and S2)
+# Model quantities (Figures 1 to 3, Table 1, Figures S1 and S2), computed
+# without simulation except for the Spearman correlation of PFS and OS
 #
 # Run from the package root:
 #   source("inst/paper/data_generation/01_model_quantities.R")
-# Writes inst/paper/data/model_quantities.rds. No random numbers are used.
+# Writes inst/paper/data/model_quantities.rds. Random numbers are used only for
+# the Spearman correlation of PFS and OS, with the seed seed_of(1, i, 1) for the
+# i-th proportion of deaths.
 
 source(file.path("inst", "paper", "data_generation", "settings.R"))
 t_start <- proc.time()
@@ -126,9 +128,20 @@ corS2 <- t(vapply(seq_len(nrow(gridS2)), function(i) {
   c(CorEndpoints(a), gam0 = a$gam0)
 }, numeric(5)))
 figS2 <- cbind(gridS2, corS2)
+# Spearman correlation of PFS and OS with kappa = 1, estimated from one simulated
+# sample of 10^6 patients for each proportion of deaths
+n_spearman <- round(1e6 * nsim_scale)
+spearman_pfs_os <- vapply(seq_along(pis), function(i) {
+  d <- rOncoEndpoints(nsim = 1, n = n_spearman, arms = ctl_arm(1, death.prop = pis[i]),
+                      seed = seed_of(1, i, 1))
+  stats::cor(d$pfs_time, d$os_time, method = "spearman")
+}, numeric(1))
+figS2_spearman <- data.frame(death_prop = pis, kappa = 1, spearman_pfs_os = spearman_pfs_os,
+                             n = n_spearman)
 
 model_quantities <- list(fig1 = fig1, fig2 = fig2, fig3 = fig3, table1 = tab1,
-                         figS1 = figS1, figS2 = figS2, base = base,
+                         figS1 = figS1, figS2 = figS2, figS2_spearman = figS2_spearman,
+                         base = base,
                          two_group = two_group, info = run_info(t_start, pilot))
 saveRDS(model_quantities, file.path(data_dir, "model_quantities.rds"))
 message("01_model_quantities.R: ", round(model_quantities$info$elapsed_sec, 1), " seconds")
