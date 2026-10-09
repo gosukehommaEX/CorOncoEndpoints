@@ -16,22 +16,36 @@ if (!exists("OncoArm")) library(CorOncoEndpoints)
 out_dir <- file.path("inst", "validation", "output")
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
-scenarios <- list(
-  idm_cor = OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40, death.prop = 0.15,
-                    os.median = 15, pps.hr.resp = 0.6),
-  idm_landmark = OncoArm(pfs.median = 6, orr = 0.30, resp.pfs.median = 11,
+# The scenarios are kept as calls so that their arguments can be written to
+# validate_generator_inputs.csv (Table S3 of the article).
+scenario_calls <- list(
+  idm_cor = quote(OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40, death.prop = 0.15,
+                    os.median = 15, pps.hr.resp = 0.6)),
+  idm_landmark = quote(OncoArm(pfs.median = 6, orr = 0.30, resp.pfs.median = 11,
                          death.prop = 0.15, pps.median = 8,
-                         resp.timing = "landmark", resp.tau = 1.5),
-  idm_negative = OncoArm(pfs.median = 4, orr = 0.45, resp.cor = -0.2, death.prop = 0.05,
-                         os.median = 10, pps.hr.resp = 2),
-  idm_strong = OncoArm(pfs.median = 10, orr = 0.6, resp.cor = 0.6, death.prop = 0.3,
-                       os.median = 30, pps.hr.resp = 0.3),
-  expexp_ttr = OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40, death.prop = 0.15,
+                         resp.timing = "landmark", resp.tau = 1.5)),
+  idm_negative = quote(OncoArm(pfs.median = 4, orr = 0.45, resp.cor = -0.2, death.prop = 0.05,
+                         os.median = 10, pps.hr.resp = 2)),
+  idm_strong = quote(OncoArm(pfs.median = 10, orr = 0.6, resp.cor = 0.6, death.prop = 0.3,
+                       os.median = 30, pps.hr.resp = 0.3)),
+  expexp_ttr = quote(OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40, death.prop = 0.15,
                        os.model = "expexp", os.median = 15, resp.timing = "ttr",
-                       resp.tau = 1.5, ttr.median = 2.5),
-  expexp_fleischer = OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40,
-                             death.prop = 0.40, os.model = "expexp", os.median = 15)
+                       resp.tau = 1.5, ttr.median = 2.5)),
+  expexp_fleischer = quote(OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40,
+                             death.prop = 0.40, os.model = "expexp", os.median = 15))
 )
+scenarios <- lapply(scenario_calls, eval)
+scenario_inputs <- data.frame(
+  scenario = names(scenario_calls),
+  inputs = vapply(scenario_calls, function(cl) {
+    a <- as.list(cl)[-1]
+    paste(names(a), "=", vapply(a, function(x) gsub("\"", "", deparse(x)), character(1)),
+          collapse = ", ")
+  }, character(1)),
+  seed = paste0("1000 * batch + ", seq_along(scenario_calls)),
+  stringsAsFactors = FALSE)
+utils::write.csv(scenario_inputs, file.path(out_dir, "validate_generator_inputs.csv"),
+                 row.names = FALSE)
 
 nb <- 40
 nper <- 50000
@@ -53,7 +67,10 @@ for (nm in names(scenarios)) {
   stats_b <- matrix(NA_real_, nb, 13)
   struct_ok <- TRUE
   for (b in seq_len(nb)) {
-    d <- rOncoEndpoints(nsim = 1, n = nper, arms = arm, seed = 1000 * b + nchar(nm))
+    # seed 1000 * batch + scenario number (until 2026-10-09 the scenario part was
+    # nchar(nm), which gave the same seeds to scenarios with names of equal length)
+    d <- rOncoEndpoints(nsim = 1, n = nper, arms = arm,
+                        seed = 1000 * b + match(nm, names(scenarios)))
     r <- d$response == 1
     struct_ok <- struct_ok && all(d$pfs_time <= d$os_time) &&
       all((d$os_time == d$pfs_time) == (d$progression == 0))

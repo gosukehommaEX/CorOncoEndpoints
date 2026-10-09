@@ -5,7 +5,10 @@
 # endpoint, and the power given by the formulas of Yu and Ganju (2022) and
 # Barnhart et al. (2025) with (i) the mean overall probabilities and (ii) the
 # overall probabilities implied by the mean marginal probabilities under
-# independence of the endpoints.
+# independence of the endpoints. It also returns the standard deviation of
+# log(WR) over the trials, the mean of its estimated standard errors and the
+# standard deviation sqrt(Var / N) given by the variance formula of Yu and
+# Ganju (2022) with the mean probabilities and 1:1 allocation.
 #
 # Arguments
 #   st    data frame of per-trial statistics (04_win_statistics_simulation.R)
@@ -35,6 +38,8 @@ win_summary <- function(st, n, alpha = 0.025) {
                                alpha = alpha, measure = "wr"),
     power_wo_indep = win_power(ind[["p_win"]], ind[["p_loss"]], ind[["p_tie"]], n,
                                alpha = alpha, measure = "wo"),
+    sd_log_wr = stats::sd(log(st$wr)), mean_se_log_wr = mean(st$se_log_wr),
+    sigma_wr_formula = sqrt(4 * (1 + m[["p_tie"]]) / (3 * 0.25 * (1 - m[["p_tie"]]) * n)),
     nsim = nrow(st), mean_cutoff = mean(st$cutoff),
     mean_deaths = if (is.null(st$deaths)) NA_real_ else mean(st$deaths))
 }

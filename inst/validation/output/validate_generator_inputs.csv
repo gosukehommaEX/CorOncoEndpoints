@@ -1,0 +1,7 @@
+"scenario","inputs","seed"
+"idm_cor","pfs.median = 6, orr = 0.3, resp.cor = 0.4, death.prop = 0.15, os.median = 15, pps.hr.resp = 0.6","1000 * batch + 1"
+"idm_landmark","pfs.median = 6, orr = 0.3, resp.pfs.median = 11, death.prop = 0.15, pps.median = 8, resp.timing = landmark, resp.tau = 1.5","1000 * batch + 2"
+"idm_negative","pfs.median = 4, orr = 0.45, resp.cor = -0.2, death.prop = 0.05, os.median = 10, pps.hr.resp = 2","1000 * batch + 3"
+"idm_strong","pfs.median = 10, orr = 0.6, resp.cor = 0.6, death.prop = 0.3, os.median = 30, pps.hr.resp = 0.3","1000 * batch + 4"
+"expexp_ttr","pfs.median = 6, orr = 0.3, resp.cor = 0.4, death.prop = 0.15, os.model = expexp, os.median = 15, resp.timing = ttr, resp.tau = 1.5, ttr.median = 2.5","1000 * batch + 5"
+"expexp_fleischer","pfs.median = 6, orr = 0.3, resp.cor = 0.4, death.prop = 0.4, os.model = expexp, os.median = 15","1000 * batch + 6"

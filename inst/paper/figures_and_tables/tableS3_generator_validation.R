@@ -9,6 +9,8 @@
 source(file.path("inst", "paper", "figures_and_tables", "settings.R"))
 src <- file.path("inst", "validation", "output", "validate_generator.csv")
 vg <- utils::read.csv(src, stringsAsFactors = FALSE)
+src_in <- file.path("inst", "validation", "output", "validate_generator_inputs.csv")
+vin <- utils::read.csv(src_in, stringsAsFactors = FALSE)
 scen <- unique(vg$scenario)
 parts <- split(scen, ceiling(seq_along(scen) / 2))
 esc <- function(x) gsub("_", "\\\\_", gsub("<=", "$\\\\le$", x))
@@ -33,14 +35,22 @@ for (i in seq_along(parts)) {
                   notes = paste0("Estimates are means over 40 batches of 50,000 patients; SE is ",
                                  "the standard deviation over batches divided by $\\sqrt{40}$ and ",
                                  "$z = (\\mathrm{estimate} - \\mathrm{theory}) / \\mathrm{SE}$. ",
-                                 "PASS when $|z| < 4$. The scenarios are defined in ",
-                                 "\\texttt{inst/validation/validate\\_generator.R} of the package."),
+                                 "PASS when $|z| < 4$. Arguments of \\texttt{OncoArm()}: ",
+                                 paste0("\\texttt{", esc(parts[[i]]), "}: ",
+                                        vin$inputs[match(parts[[i]], vin$scenario)],
+                                        collapse = "; "),
+                                 ". The seed of batch $b$ of scenario $s$ ",
+                                 "($s = 1, \\ldots, ", nrow(vin), "$ in the order of Table S3a to S3c) ",
+                                 "is $1000 b + s$ (\\texttt{inst/validation/validate\\_generator.R} ",
+                                 "of the package)."),
                   size = "\\scriptsize\\setlength{\\tabcolsep}{3pt}")
 }
 tab <- table(factor(vg$judgment, levels = c("PASS", "FAIL")))
 write_numbers("tableS3_generator_validation",
-              key = c("n_pass", "n_fail", "n_rows", "max_abs_z"),
-              value = c(tab[["PASS"]], tab[["FAIL"]], nrow(vg), max(abs(vg$z), na.rm = TRUE)),
+              key = c("n_pass", "n_fail", "n_rows", "n_with_z", "n_structural", "max_abs_z"),
+              value = c(tab[["PASS"]], tab[["FAIL"]], nrow(vg), sum(!is.na(vg$z)),
+                        sum(is.na(vg$z)), max(abs(vg$z), na.rm = TRUE)),
               description = c("number of PASS", "number of FAIL", "number of comparisons",
-                              "largest |z|"),
+                              "number of comparisons with a z statistic",
+                              "number of structural checks (no z)", "largest |z|"),
               source = src)

@@ -10,14 +10,15 @@ src <- "design_simulation.rds"
 ds <- readRDS(file.path(data_dir, src))
 tg <- ds$two_group
 lab_sc <- c(S1 = "$\\pi = 0.15$, $\\kappa = 0.6$", S2 = "$\\pi = 0.15$, $\\kappa = 1$",
-            S3 = "$\\pi = 0.30$, $\\kappa = 0.6$", S4 = "Exp--exp, OS HR 0.75")
+            S3 = "$\\pi = 0.30$, $\\kappa = 0.6$", S4 = "Exp--exp, OS HR 0.75",
+            S5 = "$\\pi = 0.15$, $\\kappa = 0.3$", S6 = "$\\pi = 0.15$, $\\kappa = 0.3$, 2:1")
 lab_an <- c(os_ahr = "OS, average HR", os_median = "OS, HR of medians",
             pfs_ahr = "PFS")
 body <- c()
 num <- list()
 for (s in names(ds$results)) {
   r <- ds$results[[s]]
-  an <- if (s == "S1") c("os_ahr", "os_median", "pfs_ahr") else c("os_ahr", "os_median")
+  an <- if (s %in% c("S1", "S6")) c("os_ahr", "os_median", "pfs_ahr") else c("os_ahr", "os_median")
   for (k in an) {
     dz <- r$design[r$design$analysis == k, ]
     feas <- dz$feasible
@@ -45,20 +46,21 @@ header <- c(paste0("Scenario & Analysis & HR & Events & \\multicolumn{2}{c}{Anal
             "\\cmidrule(lr){5-6}",
             " & & & & Expected & Simulated & \\\\")
 nsim <- ds$results[[1]]$nsim
-caption <- paste0("Number of events required by the Schoenfeld formula with the average hazard ",
+n6 <- ds$results$S6$n
+caption <- paste0("Number of events required by the Schoenfeld formula~\\cite{Schoenfeld1981} with the average hazard ",
                   "ratio (average HR) and with the hazard ratio of the two OS medians (HR of ",
                   "medians), and power of the log-rank test in ", format(nsim, big.mark = ","),
                   " simulated trials per scenario.")
-notes <- c(paste0(tg$n[1], " patients per group enrolled uniformly over ", tg$a_time[2],
+notes <- c(paste0(tg$n[1], " patients per group (", n6[1], " control and ", n6[2],
+                  " experimental patients with 2:1 allocation) enrolled uniformly over ", tg$a_time[2],
                   " months, one-sided significance level ", tg$alpha, " and target power ",
                   tg$power, ". Control group: PFS median 6 months, response rate 0.30, ",
                   "$\\mathrm{Corr}(\\mathrm{PFS}, R) = 0.40$, OS median 15 months. Experimental ",
                   "group: PFS hazard ratio 0.7 and response rate 0.45, with the same ",
                   "post-progression hazards. Exp--exp: both groups with exponential PFS and OS. ",
-                  "Analysis times are in months from the start of enrolment. The hazard ratio, ",
-                  "number of events and expected analysis time of PFS are the same in all ",
-                  "scenarios, and PFS is shown for the first scenario only. MCSE, Monte Carlo ",
-                  "standard error."),
+                  "Analysis times are in months from the start of enrollment. PFS does not ",
+                  "depend on $\\pi$ and $\\kappa$, and it is shown for the first scenario and ",
+                  "for the scenario with 2:1 allocation. MCSE, Monte Carlo standard error."),
            "[a] More events than patients; not attainable.")
 write_table_tex("table2_required_events", caption = caption, label = "tab:events",
                 align = "p{2.1cm}p{2.4cm}rrrrr", header = header, body = body, notes = notes,

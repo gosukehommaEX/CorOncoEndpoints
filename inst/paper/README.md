@@ -41,11 +41,14 @@ source("inst/paper/data_generation/02_design_simulation.R")
 source("inst/paper/data_generation/03_two_in_one_simulation.R")
 source("inst/paper/data_generation/04_win_statistics_simulation.R")
 source("inst/paper/data_generation/05_computing_time.R")
+source("inst/reproduce/reproduce_published.R")
+source("inst/validation/validate_generator.R")
 source("inst/paper/figures_and_tables/make_all.R")
 ```
 
 The tables S2 and S3 read the outputs of `inst/reproduce/reproduce_published.R`
-and `inst/validation/validate_generator.R`, which are not run again.
+and `inst/validation/validate_generator.R`; `make_all.R` does not run these two
+scripts.
 
 ## Figures and tables
 
@@ -75,4 +78,5 @@ and `inst/validation/validate_generator.R`, which are not run again.
 `rOncoEndpoints()` uses the dqrng generator; `set.seed()` has no effect. Each
 batch of 1,000 trials uses the seed 10^6 x (script number) + 10^3 x (scenario
 number) + (batch number) (`functions/seed_of.R`); the expansion part of the
-2-in-1 trials adds 500,000.
+2-in-1 trials adds 500,000. In `inst/validation/validate_generator.R`, batch b
+of scenario s uses the seed 1000 x b + s.

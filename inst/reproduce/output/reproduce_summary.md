@@ -19,9 +19,9 @@ PASS: 18, EXPLAINED: 1, FAIL: 0, INFO: 1
 | Fleischer et al. (2009) | Example 2: expected OS events at 47 months, exponential OS | 1147.000 | 1146.0563 | 1e+00 | PASS |
 | Fleischer et al. (2009) | Example 2: expected OS events at 47 months, model with death proportion 1/3 | 1201.000 | 1198.2594 | 1e+00 | EXPLAINED |
 | Fleischer et al. (2009) | Example 2: power of the log-rank test at 1201 events (88.7%) |    0.887 | - | - | INFO |
-| TrialSimulator (CorrelatedPfsAndOs3 example) | Corr(PFS, OS), h01 = 0.1, h02 = 0.05, h12 = 0.12 (simulated, 1e6) |    0.650 | 0.6470 | 5e-03 | PASS |
-| TrialSimulator (CorrelatedPfsAndOs3 example) | median PFS |    4.620 | 4.6210 | 5e-03 | PASS |
-| TrialSimulator (CorrelatedPfsAndOs3 example) | median OS |    9.610 | 9.6119 | 5e-03 | PASS |
+| TrialSimulator (solveThreeStateModel example) | Corr(PFS, OS), h01 = 0.1, h02 = 0.05, h12 = 0.12 (Monte Carlo, n = 1e6) |    0.650 | 0.6470 | 5e-03 | PASS |
+| TrialSimulator (solveThreeStateModel example) | median PFS (Monte Carlo, n = 1e6) |    4.620 | 4.6210 | 5e-03 | PASS |
+| TrialSimulator (solveThreeStateModel example) | median OS (Monte Carlo, n = 1e6) |    9.610 | 9.6119 | 5e-03 | PASS |
 | Erdmann et al. (2025) | Table 1, scenario 1: PFS hazard ratio |    0.720 | 0.7200 | 5e-04 | PASS |
 | Erdmann et al. (2025) | Table 1, scenario 2: PFS hazard ratio |    0.725 | 0.7250 | 5e-04 | PASS |
 | Erdmann et al. (2025) | Table 1, scenario 3: PFS hazard ratio |    0.764 | 0.7636 | 5e-04 | PASS |
