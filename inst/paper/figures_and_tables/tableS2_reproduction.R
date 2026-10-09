@@ -10,7 +10,7 @@ src <- file.path("inst", "reproduce", "output", "reproduce_results.csv")
 rr <- utils::read.csv(src, stringsAsFactors = FALSE)
 esc <- function(x) gsub("_", "\\\\_", gsub("&", "\\\\&", gsub("%", "\\\\%", x)))
 note_id <- cumsum(rr$judgment %in% c("EXPLAINED", "INFO"))
-mark <- ifelse(rr$judgment %in% c("EXPLAINED", "INFO"), paste0("\\tnote{", letters[note_id], "}"), "")
+mark <- ifelse(rr$judgment %in% c("EXPLAINED", "INFO"), paste0("\\tnote{", letters[pmax(note_id, 1)], "}"), "")
 body <- paste0(esc(rr$source), " & ", esc(rr$quantity), " & ",
                formatC(rr$published, format = "g", digits = 6), " & ",
                ifelse(is.na(rr$computed), "--", formatC(rr$computed, format = "f", digits = 4)), " & ",

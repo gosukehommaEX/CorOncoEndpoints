@@ -41,13 +41,17 @@ for (i in seq_len(nrow(conds))) {
 }
 conds$patients <- conds$nsim * 500
 machine <- list(sysname = Sys.info()[["sysname"]], release = Sys.info()[["release"]],
+                os = utils::osVersion,
                 cpu = tryCatch(if (.Platform$OS.type == "windows") {
-                  trimws(utils::tail(system("wmic cpu get name", intern = TRUE), -1)[1])
+                  trimws(system2("powershell", c("-NoProfile", "-Command",
+                                                 "(Get-CimInstance Win32_Processor).Name"),
+                                 stdout = TRUE)[1])
                 } else {
                   sub(".*: ", "", grep("model name", readLines("/proc/cpuinfo"), value = TRUE)[1])
                 }, error = function(e) NA_character_),
                 cores = parallel::detectCores(), r_version = R.version.string,
                 dqrng_version = as.character(utils::packageVersion("dqrng")))
+if (is.na(machine$cpu) || !nzchar(machine$cpu)) machine$cpu <- Sys.getenv("PROCESSOR_IDENTIFIER")
 computing_time <- list(times = conds, reps = reps, machine = machine,
                        info = run_info(t_start, pilot))
 saveRDS(computing_time, file.path(data_dir, "computing_time.rds"))

@@ -9,7 +9,7 @@ src <- "computing_time.rds"
 ct <- readRDS(file.path(data_dir, src))
 tm <- ct$times[order(ct$times$os_model != "idm", ct$times$resp_timing, ct$times$nsim), ]
 body <- paste0("\\texttt{", tm$os_model, "} & \\texttt{", tm$resp_timing, "} & ",
-               format(tm$nsim, big.mark = ","), " & ", format(tm$patients, big.mark = ","), " & ",
+               format(tm$nsim, big.mark = ","), " & ", format(tm$patients, big.mark = ",", scientific = FALSE), " & ",
                fmt_num(tm$median_sec, 2), " & ",
                fmt_num(tm$patients / tm$median_sec / 1e6, 1), " \\\\")
 mc <- ct$machine
@@ -22,7 +22,8 @@ write_table_tex("tableS5_computing_time",
                 body = body,
                 notes = paste0("Accrual over 24 months and dropout hazard 0.01 per month. ",
                                "Machine: ", gsub("_", "\\\\_", mc$cpu), ", ", mc$cores,
-                               " logical cores, ", mc$sysname, " ", mc$release, ", ", mc$r_version,
+                               " logical cores, ", if (is.null(mc$os)) paste(mc$sysname, mc$release) else mc$os,
+                               ", ", mc$r_version,
                                ", dqrng ", mc$dqrng_version, ". One core is used."),
                 size = "\\small")
 write_numbers("tableS5_computing_time",
