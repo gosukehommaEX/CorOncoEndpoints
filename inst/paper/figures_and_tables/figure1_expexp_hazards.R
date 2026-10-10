@@ -14,13 +14,15 @@ cv <- f1$curves
 # plotmath call h(t) are drawn taller than ordinary text and shift the label
 # against its key. Every label ends with the invisible strut
 # phantom(""[0] * "("), so that all labels have the same height and depth and
-# are centred on their keys in the same way.
+# are centred on their keys in the same way. The devices draw character 45
+# ("-") as a minus sign, so the en dash is written as \u2013 and the hyphen as
+# \u00ad (soft hyphen, drawn as a hyphen).
 lab_a <- expression(paste(h["12"], "(t): Markov model, constant ", h["02"],
                           phantom(""[0] * "(")),
-                    paste(h["12"], "(t): exp-exp model", phantom(""[0] * "(")),
-                    paste(h["02"], "(t): exp-exp model", phantom(""[0] * "(")),
+                    paste(h["12"], "(t): exp\u2013exp model", phantom(""[0] * "(")),
+                    paste(h["02"], "(t): exp\u2013exp model", phantom(""[0] * "(")),
                     paste(h["02"], " = ", pi, lambda[P], ": constant", phantom(""[0] * "(")),
-                    paste(gamma[0], ": illness-death model (", kappa == 1, ")",
+                    paste(gamma[0], ": illness\u2013death model (", kappa == 1, ")",
                           phantom(""[0] * "(")))
 lev_a <- c("markov", "expexp", "expexp_h02", "const_h02", "idm")
 da <- rbind(data.frame(t = cv$t, h = cv$markov_h12, s = "markov"),
@@ -52,7 +54,7 @@ lev_b <- c("gumbel", "const_h02")
 # one line per label, so that each label is centred on its key; that the curve
 # is the hazard just after a progression at month s is stated by the axis
 # label and the caption
-lab_b <- expression(paste("Gumbel latent-time model", phantom(""[0] * "(")),
+lab_b <- expression(paste("Gumbel latent\u00adtime model", phantom(""[0] * "(")),
                     paste(h["02"], " = ", pi, lambda[P], phantom(""[0] * "(")))
 db$s <- factor(db$s, levels = lev_b)
 p_b <- ggplot(db, aes(t, h, colour = s, linetype = s)) +

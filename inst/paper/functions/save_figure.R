@@ -6,8 +6,10 @@
 # expressions come from the Symbol font), so that no Type 3 font appears when
 # the .eps file is converted to PDF. cairo_ps() was not used because its .eps
 # files gave a Type 3 font after conversion with Ghostscript. All labels must
-# therefore be ASCII or plotmath expressions. dpi = 800 is passed for any part
-# that would be rasterized (there is none).
+# therefore be ASCII or plotmath expressions. These devices draw character 45
+# ("-") as a minus sign; write an en dash as "\u2013" and a hyphen as "\u00ad"
+# (soft hyphen, drawn as a hyphen), so that the source stays ASCII. dpi = 800
+# is passed for any part that would be rasterized (there is none).
 #
 # Arguments
 #   plot   ggplot or patchwork object

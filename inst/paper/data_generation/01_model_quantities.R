@@ -5,7 +5,9 @@
 #   source("inst/paper/data_generation/01_model_quantities.R")
 # Writes inst/paper/data/model_quantities.rds. Random numbers are used only for
 # the Spearman correlation of PFS and OS, with the seed seed_of(1, i, 1) for the
-# i-th proportion of deaths.
+# i-th proportion of deaths, seed_of(1, 20 + j, 1) for the j-th shorter OS
+# median (12 and 10 months) and seed_of(1, 23, 1) for the example with
+# kappa = 0.25 and Corr(PFS, R) = 0.6.
 
 source(file.path("inst", "paper", "data_generation", "settings.R"))
 t_start <- proc.time()
@@ -138,9 +140,38 @@ spearman_pfs_os <- vapply(seq_along(pis), function(i) {
 }, numeric(1))
 figS2_spearman <- data.frame(death_prop = pis, kappa = 1, spearman_pfs_os = spearman_pfs_os,
                              n = n_spearman)
+# Pearson and Spearman correlations of PFS and OS with kappa = 1 and death
+# proportion 0.02 for shorter OS medians (ratios of the medians 0.5 and 0.6);
+# with kappa = 1 both depend only on the death proportion and the ratio of the
+# medians. Seed seed_of(1, 20 + j, 1) for the j-th OS median.
+os_medians_short <- c(12, 10)
+death_prop_short <- 0.02
+figS2_ratio <- do.call(rbind, lapply(seq_along(os_medians_short), function(j) {
+  a <- OncoArm(pfs.median = base$pfs_median, orr = base$orr, resp.cor = base$resp_cor,
+               death.prop = death_prop_short, os.median = os_medians_short[j],
+               pps.hr.resp = 1)
+  d <- rOncoEndpoints(nsim = 1, n = n_spearman, arms = a, seed = seed_of(1, 20 + j, 1))
+  data.frame(os_median = os_medians_short[j], death_prop = death_prop_short, kappa = 1,
+             median_ratio = base$pfs_median / os_medians_short[j],
+             cor_pfs_os = CorEndpoints(a)[["cor.pfs.os"]],
+             spearman_pfs_os = stats::cor(d$pfs_time, d$os_time, method = "spearman"),
+             n = n_spearman)
+}))
+# Pearson and Spearman correlations of PFS and OS with kappa = 0.25,
+# Corr(PFS, R) = 0.6 and death proportion 0.02 (OS median 15 months): an example
+# in which the Spearman correlation exceeds that with kappa = 1. Seed
+# seed_of(1, 23, 1).
+a_k025 <- ctl_arm(0.25, death.prop = death_prop_short, resp.cor = 0.6)
+d_k025 <- rOncoEndpoints(nsim = 1, n = n_spearman, arms = a_k025, seed = seed_of(1, 23, 1))
+figS2_kappa <- data.frame(kappa = 0.25, resp_cor = 0.6, death_prop = death_prop_short,
+                          cor_pfs_os = CorEndpoints(a_k025)[["cor.pfs.os"]],
+                          spearman_pfs_os = stats::cor(d_k025$pfs_time, d_k025$os_time,
+                                                       method = "spearman"),
+                          n = n_spearman)
 
 model_quantities <- list(fig1 = fig1, fig2 = fig2, fig3 = fig3, table1 = tab1,
                          figS1 = figS1, figS2 = figS2, figS2_spearman = figS2_spearman,
+                         figS2_ratio = figS2_ratio, figS2_kappa = figS2_kappa,
                          base = base,
                          two_group = two_group, info = run_info(t_start, pilot))
 saveRDS(model_quantities, file.path(data_dir, "model_quantities.rds"))

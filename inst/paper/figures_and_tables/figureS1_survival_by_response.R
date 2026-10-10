@@ -17,7 +17,7 @@ long <- rbind(
 long$panel <- factor(long$panel, levels = c("PFS", "paste('OS, ', kappa == 1)",
                                           "paste('OS, ', kappa == 0.6)"))
 long$response <- factor(long$response, levels = c("responders", "nonresponders"),
-                        labels = c("Responders", "Non-responders"))
+                        labels = c("Responders", "Non\u00adresponders"))  # \u00ad: hyphen glyph
 p <- ggplot(long, aes(t, surv, colour = response, linetype = response)) +
   geom_line(linewidth = 0.6) +
   facet_wrap(~ panel, nrow = 1, labeller = label_parsed) +

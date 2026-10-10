@@ -81,4 +81,8 @@ number) + (batch number) (`functions/seed_of.R`); the expansion part of the
 2-in-1 trials adds 500,000. In `inst/validation/validate_generator.R`, batch b
 of scenario s uses the seed 1000 x b + s. In `01_model_quantities.R`, the
 Spearman correlation of PFS and OS for the i-th proportion of deaths of Figure
-S2 is computed from one sample of 10^6 patients with the seed seed_of(1, i, 1).
+S2 is computed from one sample of 10^6 patients with the seed seed_of(1, i, 1),
+and that for the j-th shorter OS median (12 and 10 months, proportion of deaths
+0.02) with the seed seed_of(1, 20 + j, 1), and that of the example with
+kappa = 0.25 and Corr(PFS, R) = 0.6 (proportion of deaths 0.02) with the
+seed seed_of(1, 23, 1).

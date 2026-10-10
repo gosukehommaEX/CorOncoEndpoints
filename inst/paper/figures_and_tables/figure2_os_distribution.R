@@ -10,10 +10,14 @@ src <- "model_quantities.rds"
 f2 <- readRDS(file.path(data_dir, src))$fig2
 cv <- f2$curves
 lev <- c("idm_kappa1", "idm_kappa06", "exponential_os", "pfs")
-lab <- expression(paste("OS, illness-death, ", kappa == 1),
-                  paste("OS, illness-death, ", kappa == 0.6),
-                  "OS, exponential (exp-exp model)",
-                  "PFS")
+# en dash written as \u2013, because character 45 ("-") is drawn as a minus sign.
+# Every label ends with the invisible strut phantom(""[0] * "(") as in Figure 1,
+# so that all labels have the same height and depth and plain-text labels sit
+# on the same baseline as those with Greek letters.
+lab <- expression(paste("OS, illness\u2013death, ", kappa == 1, phantom(""[0] * "(")),
+                  paste("OS, illness\u2013death, ", kappa == 0.6, phantom(""[0] * "(")),
+                  paste("OS, exponential (exp\u2013exp model)", phantom(""[0] * "(")),
+                  paste("PFS", phantom(""[0] * "(")))
 # the exp-exp OS distribution is the exponential distribution with the same
 # median, so only the latter is drawn; panel (b) shows the hazards of the same
 # four distributions so that (a) and (b) share one legend. The legend titles
@@ -48,7 +52,9 @@ p_b <- ggplot(d, aes(t, hazard, colour = model, linetype = model)) +
 hr <- f2$hr
 lev_k <- c("1", "0.6", "0.3")
 hr$kappa <- factor(hr$kappa, levels = lev_k)
-lab_k <- expression(kappa == 1, kappa == 0.6, kappa == 0.3)
+lab_k <- expression(paste(kappa == 1, phantom(""[0] * "(")),
+                    paste(kappa == 0.6, phantom(""[0] * "(")),
+                    paste(kappa == 0.3, phantom(""[0] * "(")))
 p_c <- ggplot(hr, aes(t, hr_os, colour = kappa, linetype = kappa)) +
   geom_line(linewidth = 0.6) +
   geom_hline(yintercept = f2$hr_pfs, colour = "grey40", linetype = "dotted") +
