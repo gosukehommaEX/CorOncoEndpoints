@@ -29,6 +29,15 @@ survives for a post-progression time. Two models for OS are available.
   determined by the exponential OS distribution, so it cannot be
   specified separately and does not depend on response.
 
+A group can also be described by two of the three endpoints (`endpoints`
+in
+[`OncoArm`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/OncoArm.md)),
+including OS and response without PFS, and the correlation between PFS
+and OS can be given instead of the proportion of PFS events that are
+deaths. Simulated trials have piecewise accrual given by rates or
+proportions, exponential or piecewise exponential dropout and an
+optional censoring of PFS alone.
+
 Main functions:
 
 - [`OncoArm`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/OncoArm.md):

@@ -1,0 +1,163 @@
+# Win ratio and win odds of prioritized endpoints
+
+``` r
+
+library(CorOncoEndpoints)
+```
+
+In a generalized pairwise comparison, every patient of the treatment
+group is compared with every patient of the control group on prioritized
+outcomes. Here a pair is decided on OS if possible, otherwise on PFS and
+otherwise on response, and it is a tie if no outcome decides it. With
+`p_win`, `p_loss` and `p_tie` the proportions of pairs won, lost and
+tied by the treatment patient, the win ratio (Pocock et al., 2012) is
+`p_win / p_loss` and the win odds (Brunner et al., 2021) is
+`(p_win + p_tie / 2) / (p_loss + p_tie / 2)`. OS and PFS are compared
+with the scores of Gehan (1965): the patient with the longer observed
+time wins if the event of the other patient has been observed.
+
+For planning, Yu and Ganju (2022) approximated the variance of the log
+win ratio by `4 (1 + p_tie) / {3 r (1 - r) (1 - p_tie) N}` for `N`
+patients allocated in proportions `r` and `1 - r`. Because the overall
+proportions of several prioritized outcomes are difficult to specify,
+Barnhart et al. (2025) computed them from the proportions of pairs won
+and lost on each outcome as if the outcomes were independent. The
+generator gives the overall proportions under the dependence implied by
+the design inputs.
+
+## Groups and simulated trials
+
+The two groups below differ in PFS (hazard ratio 0.7) and response rate,
+and survival after progression does not depend on response
+(`pps.hr.resp = 1`), so that the distributions of OS, PFS and response
+in each group do not depend on the correlation between PFS and response.
+Responses have a time to response and count only if they are observed by
+the analysis. Trials with 200 patients per group enrolled over 24 months
+are analyzed at month 30.
+
+``` r
+
+make_arms <- function(rho) {
+  ctl <- OncoArm(pfs.median = 6, orr = 0.30, resp.cor = rho, death.prop = 0.15,
+                 os.median = 15, resp.timing = "ttr", resp.tau = 1.5,
+                 ttr.median = 2.5)
+  trt <- OncoArm(pfs.median = 6 / 0.7, orr = 0.45, resp.cor = rho,
+                 death.prop = 0.15, pps.hazard = ctl$gam0, resp.timing = "ttr",
+                 resp.tau = 1.5, ttr.median = 2.5)
+  list(Control = ctl, Treatment = trt)
+}
+```
+
+The proportions of pairs won and lost are computed for each trial:
+
+``` r
+
+# wins and losses of treatment patients (rows) against control patients
+gehan <- function(t1, e1, t0, e0) {
+  list(win = outer(t1, t0, ">") & matrix(e0 == 1, length(t1), length(t0), byrow = TRUE),
+       loss = outer(t1, t0, "<") & matrix(e1 == 1, length(t1), length(t0)))
+}
+win_props <- function(d) {
+  x <- d[d$group == "Treatment", ]
+  y <- d[d$group == "Control", ]
+  os <- gehan(x$os_tte, x$os_event, y$os_tte, y$os_event)
+  pf <- gehan(x$pfs_tte, x$pfs_event, y$pfs_tte, y$pfs_event)
+  rw <- outer(x$response_obs == 1, y$response_obs == 1, ">")
+  rl <- outer(x$response_obs == 1, y$response_obs == 1, "<")
+  tie_os <- !(os$win | os$loss)
+  tie_pfs <- tie_os & !(pf$win | pf$loss)
+  c(p_win = mean(os$win | (tie_os & pf$win) | (tie_pfs & rw)),
+    p_loss = mean(os$loss | (tie_os & pf$loss) | (tie_pfs & rl)),
+    w_os = mean(os$win), l_os = mean(os$loss), w_pfs = mean(pf$win),
+    l_pfs = mean(pf$loss), w_resp = mean(rw), l_resp = mean(rl))
+}
+mean_props <- function(rho, nsim = 200, seed = 1) {
+  d <- rOncoEndpoints(nsim = nsim, n = c(200, 200), arms = make_arms(rho),
+                      a.time = c(0, 24), seed = seed)
+  cut <- CutoffData(d, cutoff = 30)
+  colMeans(t(vapply(split(cut, cut$sim), win_props, numeric(8))))
+}
+m0 <- mean_props(0)
+m6 <- mean_props(0.6)
+round(rbind("Corr(PFS, R) = 0" = m0, "Corr(PFS, R) = 0.6" = m6), 4)
+#>                     p_win p_loss  w_os   l_os  w_pfs  l_pfs w_resp l_resp
+#> Corr(PFS, R) = 0   0.5520  0.394 0.354 0.2711 0.5265 0.3694 0.3151 0.1645
+#> Corr(PFS, R) = 0.6 0.5446  0.393 0.354 0.2711 0.5265 0.3694 0.3152 0.1645
+```
+
+Both scenarios use the same seed. PFS and OS are then the same in the
+two scenarios and only the responses differ, so the proportions won and
+lost on OS and PFS are the same.
+
+## Overall proportions and the power formula
+
+The overall proportions from the jointly generated endpoints are
+compared with those computed from the proportions won and lost on each
+outcome as if the outcomes were independent, and both are used in the
+formula of Yu and Ganju with `N = 400` and a one-sided level of 0.025:
+
+``` r
+
+power_wr <- function(p_win, p_loss, p_tie, n = 400, r = 0.5, alpha = 0.025) {
+  s2 <- 4 * (1 + p_tie) / (3 * r * (1 - r) * (1 - p_tie))
+  pnorm(sqrt(n / s2) * log(p_win / p_loss) - qnorm(1 - alpha))
+}
+summarize <- function(m) {
+  w <- m[c("w_os", "w_pfs", "w_resp")]
+  l <- m[c("l_os", "l_pfs", "l_resp")]
+  t <- 1 - w - l
+  carry <- c(1, t[1], t[1] * t[2])
+  joint <- c(m[["p_win"]], m[["p_loss"]], 1 - m[["p_win"]] - m[["p_loss"]])
+  indep <- c(sum(w * carry), sum(l * carry), prod(t))
+  out <- rbind(joint = joint, independence = indep)
+  colnames(out) <- c("p_win", "p_loss", "p_tie")
+  cbind(out, win_ratio = out[, "p_win"] / out[, "p_loss"],
+        win_odds = (out[, "p_win"] + out[, "p_tie"] / 2) /
+          (out[, "p_loss"] + out[, "p_tie"] / 2),
+        power = power_wr(out[, "p_win"], out[, "p_loss"], out[, "p_tie"]))
+}
+s0 <- summarize(m0)
+s6 <- summarize(m6)
+round(s0, 3)
+#>              p_win p_loss p_tie win_ratio win_odds power
+#> joint        0.552  0.394 0.054     1.401    1.375 0.790
+#> independence 0.564  0.416 0.020     1.355    1.347 0.732
+round(s6, 3)
+#>              p_win p_loss p_tie win_ratio win_odds power
+#> joint        0.545  0.393 0.062     1.386    1.357 0.756
+#> independence 0.564  0.416 0.020     1.355    1.347 0.732
+```
+
+With `Corr(PFS, R) = 0`, the joint proportions give a win ratio of 1.40
+and a calculated power of 0.79, and the independence assumption gives
+1.35 and 0.73. With `Corr(PFS, R) = 0.6`, the corresponding values are
+1.39 and 0.76 for the joint proportions and 1.35 and 0.73 under
+independence. Response is consulted only for pairs tied on OS and PFS,
+so its contribution depends on how response is associated with PFS. Here
+200 simulated trials per scenario were used; more trials, or the
+variance of the log win ratio estimated from them, refine the
+comparison.
+
+## References
+
+Barnhart, H., Lokhnygina, Y., Matsouaka, R. et al. (2025). Sample size
+and power calculations with win measures based on hierarchical
+endpoints. *Statistics in Medicine*, 44, e70096.
+<https://doi.org/10.1002/sim.70096>
+
+Brunner, E., Vandemeulebroecke, M. and Mütze, T. (2021). Win odds: an
+adaptation of the win ratio to include ties. *Statistics in Medicine*,
+40, 3367-3384. <https://doi.org/10.1002/sim.8967>
+
+Gehan, E. A. (1965). A generalized Wilcoxon test for comparing
+arbitrarily singly-censored samples. *Biometrika*, 52, 203-223.
+<https://doi.org/10.1093/biomet/52.1-2.203>
+
+Pocock, S. J., Ariti, C. A., Collier, T. J. and Wang, D. (2012). The win
+ratio: a new approach to the analysis of composite endpoints in clinical
+trials based on clinical priorities. *European Heart Journal*, 33,
+176-182. <https://doi.org/10.1093/eurheartj/ehr352>
+
+Yu, R. X. and Ganju, J. (2022). Sample size formula for a win ratio
+endpoint. *Statistics in Medicine*, 41, 950-963.
+<https://doi.org/10.1002/sim.9297>

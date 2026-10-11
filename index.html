@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="index.html">CorOncoEndpoints</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="active nav-item"><a class="nav-link" href="index.html"><span class="fa fas fa-home fa-lg"></span></a></li>
+<li class="active nav-item"><a class="nav-link" href="index.html" aria-label="Home"><span class="fa fas fa-home fa-lg"></span></a></li>
 <li class="nav-item"><a class="nav-link" href="articles/introduction.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
@@ -42,6 +42,9 @@
 <li><a class="dropdown-item" href="articles/introduction.html">Getting started with CorOncoEndpoints</a></li>
     <li><a class="dropdown-item" href="articles/theory.html">Model and theory</a></li>
     <li><a class="dropdown-item" href="articles/design.html">Number of events for PFS and OS</a></li>
+    <li><a class="dropdown-item" href="articles/trial-settings.html">Accrual, dropout and the choice of endpoints</a></li>
+    <li><a class="dropdown-item" href="articles/two-in-one.html">2-in-1 adaptive design</a></li>
+    <li><a class="dropdown-item" href="articles/win-ratio.html">Win ratio and win odds of prioritized endpoints</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -50,7 +53,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/gosukehommaEX/CorOncoEndpoints"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/gosukehommaEX/CorOncoEndpoints" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -73,6 +76,19 @@
 <li>With <code>os.model = "idm"</code> (illness-death model), the death hazard after progression can differ from the death hazard before progression and can depend on response. OS is then a mixture of exponential distributions.</li>
 <li>With <code>os.model = "expexp"</code>, both PFS and OS are exactly exponential. The pre-progression death hazard decreases over time and the post-progression hazard is determined by the exponential OS distribution.</li>
 <li>Response can have a landmark (responders have PFS longer than the first tumor assessment) and a time to response, so that the response observed at an interim analysis can be derived.</li>
+<li>The correlation between PFS and OS can be given instead of the proportion of PFS events that are deaths.</li>
+<li>A group can be described by two of the three endpoints: PFS and OS, PFS and response, or OS and response. In the last case OS is exactly exponential and is linked to response directly.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="trial-settings">Trial settings<a class="anchor" aria-label="anchor" href="#trial-settings"></a>
+</h2>
+<ul>
+<li>Accrual over intervals, as in FastSurvival: rates in patients per unit time (<code>a.rate</code>, with an open final interval that ends when all patients are enrolled) or proportions (<code>a.prop</code>), with a fixed number of patients per interval. Accrual may start after time 0.</li>
+<li>Exponential or piecewise exponential dropout (<code>d.hazard</code>, <code>d.median</code>, <code>d.time</code>), and censoring of PFS alone (<code>pfs.cens.hazard</code>), for example at the start of another therapy, while OS is still followed.</li>
+<li>
+<code><a href="reference/CutoffData.html">CutoffData()</a></code> counts a response as observed only if it was determined before the cutoff, dropout and the censoring of PFS.</li>
+<li>Independent random-number streams (<code>stream</code>) for simulations in batches.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -103,7 +119,18 @@
 <span><span class="fu"><a href="reference/RequiredEvents.html">RequiredEvents</a></span><span class="op">(</span><span class="va">arms</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">350</span>, <span class="fl">350</span><span class="op">)</span>, a.time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">24</span><span class="op">)</span>, endpoint <span class="op">=</span> <span class="st">"os"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># data at the calendar time of the 366th OS event in each simulated trial</span></span>
-<span><span class="va">cut</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/CutoffData.html">CutoffData</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fu"><a href="reference/EventTime.html">EventTime</a></span><span class="op">(</span><span class="va">dat</span>, events <span class="op">=</span> <span class="fl">366</span>, endpoint <span class="op">=</span> <span class="st">"os"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">cut</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/CutoffData.html">CutoffData</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fu"><a href="reference/EventTime.html">EventTime</a></span><span class="op">(</span><span class="va">dat</span>, events <span class="op">=</span> <span class="fl">366</span>, endpoint <span class="op">=</span> <span class="st">"os"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 10 patients per month for 6 months, then 30 per month until 700 patients;</span></span>
+<span><span class="co"># dropout of 5% per year and censoring of PFS at the start of another therapy</span></span>
+<span><span class="va">dat2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/rOncoEndpoints.html">rOncoEndpoints</a></span><span class="op">(</span>nsim <span class="op">=</span> <span class="fl">1000</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">350</span>, <span class="fl">350</span><span class="op">)</span>, arms <span class="op">=</span> <span class="va">arms</span>,</span>
+<span>                       a.time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6</span><span class="op">)</span>, a.rate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">30</span><span class="op">)</span>,</span>
+<span>                       d.hazard <span class="op">=</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">0.95</span><span class="op">)</span> <span class="op">/</span> <span class="fl">12</span>, pfs.cens.hazard <span class="op">=</span> <span class="fl">0.01</span>,</span>
+<span>                       seed <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># OS and response only, with Corr(OS, R) = 0.35</span></span>
+<span><span class="va">osr</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/OncoArm.html">OncoArm</a></span><span class="op">(</span>os.median <span class="op">=</span> <span class="fl">15</span>, orr <span class="op">=</span> <span class="fl">0.30</span>, resp.cor <span class="op">=</span> <span class="fl">0.35</span>,</span>
+<span>               endpoints <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"os"</span>, <span class="st">"response"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a>
@@ -167,6 +194,22 @@
 <code>inst/validation/validate_generator.R</code>: Monte Carlo check of the generator against the theory.</li>
 <li>
 <code>inst/validation/validate_design.R</code>: simulated power of the log-rank test at the number of events from <code><a href="reference/RequiredEvents.html">RequiredEvents()</a></code>.</li>
+<li>
+<code>inst/validation/validate_options.R</code>: Monte Carlo check of the options of version 0.3.0 (groups with two endpoints, the correlation between PFS and OS as input, accrual rates, piecewise dropout and censoring of PFS).</li>
+<li>
+<code>tests/testthat/fixtures/reference_v0.2.0.rds</code>: outputs of version 0.2.0; the tests check that the same calls give the same results.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
+</h2>
+<ul>
+<li>Getting started with CorOncoEndpoints</li>
+<li>Model and theory</li>
+<li>Number of events for PFS and OS</li>
+<li>Accrual, dropout and the choice of endpoints</li>
+<li>2-in-1 adaptive design</li>
+<li>Win ratio and win odds of prioritized endpoints</li>
 </ul>
 </div>
 <div class="section level2">

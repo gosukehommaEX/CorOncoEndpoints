@@ -11,13 +11,13 @@ Source:
 
 Homma G (2026). *CorOncoEndpoints: Correlated Progression-Free Survival,
 Overall Survival and Objective Response for Oncology Trial Simulation*.
-R package version 0.2.0,
+R package version 0.3.0,
 <https://github.com/gosukehommaEX/CorOncoEndpoints>.
 
     @Manual{,
       title = {CorOncoEndpoints: Correlated Progression-Free Survival, Overall Survival and Objective Response for Oncology Trial Simulation},
       author = {Gosuke Homma},
       year = {2026},
-      note = {R package version 0.2.0},
+      note = {R package version 0.3.0},
       url = {https://github.com/gosukehommaEX/CorOncoEndpoints},
     }

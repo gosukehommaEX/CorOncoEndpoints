@@ -24,6 +24,26 @@ clinical trial simulations.
 - Response can have a landmark (responders have PFS longer than the
   first tumor assessment) and a time to response, so that the response
   observed at an interim analysis can be derived.
+- The correlation between PFS and OS can be given instead of the
+  proportion of PFS events that are deaths.
+- A group can be described by two of the three endpoints: PFS and OS,
+  PFS and response, or OS and response. In the last case OS is exactly
+  exponential and is linked to response directly.
+
+## Trial settings
+
+- Accrual over intervals, as in FastSurvival: rates in patients per unit
+  time (`a.rate`, with an open final interval that ends when all
+  patients are enrolled) or proportions (`a.prop`), with a fixed number
+  of patients per interval. Accrual may start after time 0.
+- Exponential or piecewise exponential dropout (`d.hazard`, `d.median`,
+  `d.time`), and censoring of PFS alone (`pfs.cens.hazard`), for example
+  at the start of another therapy, while OS is still followed.
+- [`CutoffData()`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/CutoffData.md)
+  counts a response as observed only if it was determined before the
+  cutoff, dropout and the censoring of PFS.
+- Independent random-number streams (`stream`) for simulations in
+  batches.
 
 ## Installation
 
@@ -55,6 +75,17 @@ RequiredEvents(arms, n = c(350, 350), a.time = c(0, 24), endpoint = "os")
 
 # data at the calendar time of the 366th OS event in each simulated trial
 cut <- CutoffData(dat, EventTime(dat, events = 366, endpoint = "os"))
+
+# 10 patients per month for 6 months, then 30 per month until 700 patients;
+# dropout of 5% per year and censoring of PFS at the start of another therapy
+dat2 <- rOncoEndpoints(nsim = 1000, n = c(350, 350), arms = arms,
+                       a.time = c(0, 6), a.rate = c(10, 30),
+                       d.hazard = -log(0.95) / 12, pfs.cens.hazard = 0.01,
+                       seed = 2)
+
+# OS and response only, with Corr(OS, R) = 0.35
+osr <- OncoArm(os.median = 15, orr = 0.30, resp.cor = 0.35,
+               endpoints = c("os", "response"))
 ```
 
 ## Functions
@@ -81,6 +112,21 @@ cut <- CutoffData(dat, EventTime(dat, events = 366, endpoint = "os"))
 - `inst/validation/validate_design.R`: simulated power of the log-rank
   test at the number of events from
   [`RequiredEvents()`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/RequiredEvents.md).
+- `inst/validation/validate_options.R`: Monte Carlo check of the options
+  of version 0.3.0 (groups with two endpoints, the correlation between
+  PFS and OS as input, accrual rates, piecewise dropout and censoring of
+  PFS).
+- `tests/testthat/fixtures/reference_v0.2.0.rds`: outputs of version
+  0.2.0; the tests check that the same calls give the same results.
+
+## Vignettes
+
+- Getting started with CorOncoEndpoints
+- Model and theory
+- Number of events for PFS and OS
+- Accrual, dropout and the choice of endpoints
+- 2-in-1 adaptive design
+- Win ratio and win odds of prioritized endpoints
 
 ## References
 
@@ -163,3 +209,12 @@ Expected events, average hazard ratio and required events
   theory](https://gosukehommaEX.github.io/CorOncoEndpoints/articles/theory.md):
 - [Number of events for PFS and
   OS](https://gosukehommaEX.github.io/CorOncoEndpoints/articles/design.md):
+
+### Trial settings and examples
+
+- [Accrual, dropout and the choice of
+  endpoints](https://gosukehommaEX.github.io/CorOncoEndpoints/articles/trial-settings.md):
+- [2-in-1 adaptive
+  design](https://gosukehommaEX.github.io/CorOncoEndpoints/articles/two-in-one.md):
+- [Win ratio and win odds of prioritized
+  endpoints](https://gosukehommaEX.github.io/CorOncoEndpoints/articles/win-ratio.md):
