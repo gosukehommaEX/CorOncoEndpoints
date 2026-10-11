@@ -1,7 +1,12 @@
 # Computing time of rOncoEndpoints() (Table S5)
 #
-# Run from the package root:
+# Run from the package root in a fresh R session (objects left by other scripts
+# can slow down the memory management of R and lengthen the measured times):
+#   devtools::load_all()
 #   source("inst/paper/data_generation/05_computing_time.R")
+# Measure on mains power with the R window in the foreground and without other
+# heavy processes such as file synchronization; the operating system may run
+# background processes on slower cores.
 # Writes inst/paper/data/computing_time.rds.
 #
 # Elapsed time of generating nsim trials of 2 x 250 patients (accrual over 24

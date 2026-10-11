@@ -55,6 +55,8 @@ p <- ggplot(long, aes(cut, rate, colour = resp_cor, linetype = method)) +
   facet_wrap(~ panel, nrow = 1, labeller = label_parsed) +
   scale_colour_manual(values = pal[c(2, 3, 4)], labels = lab_r, name = NULL) +
   scale_linetype_manual(values = c("solid", "dashed"), name = NULL) +
+  # fixed order of the two legends (otherwise set by ggplot2 and version dependent)
+  guides(linetype = guide_legend(order = 1), colour = guide_legend(order = 2)) +
   labs(x = "Expansion cutpoint c for X", y = "Type I error rate") +
   theme_paper + theme(legend.position = "bottom", legend.box = "vertical",
                       legend.margin = margin(0, 0, 0, 0))

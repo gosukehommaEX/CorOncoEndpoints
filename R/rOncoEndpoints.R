@@ -178,29 +178,40 @@ rOncoEndpoints <- function(nsim = 1, n, arms, a.time = NULL, a.rate = NULL,
       a_time = acc$time, a_counts = .accrual_counts(n[j], acc$prob),
       d_time = dsp[[j]]$time, d_hazard = dsp[[j]]$hazard, d_cum = dsp[[j]]$cum,
       pc_hazard = pc[j], ep_mode = ep_mode)
-    out$resp_tau <- rep(a$tau, length(out$sim))
-    out$group <- rep(names(arms)[j], length(out$sim))
-    out$group_index <- rep(j, length(out$sim))
     parts[[j]] <- out
   }
-  col <- function(name) unlist(lapply(parts, `[[`, name), use.names = FALSE)
-  res <- data.frame(sim = col("sim"), group = col("group"),
+  # Rows are ordered by trial and, within a trial, by group. Each row of group j
+  # is written directly to its position instead of sorting all rows.
+  n_all <- sum(n)
+  first <- c(0, cumsum(n))[seq_len(k)]
+  pos <- lapply(seq_len(k), function(j) {
+    rep((seq_len(nsim) - 1) * n_all, each = n[j]) + rep.int(first[j] + seq_len(n[j]), nsim)
+  })
+  col <- function(name) {
+    x <- parts[[1L]][[name]]
+    if (k == 1L) return(x)
+    out <- vector(typeof(x), nsim * n_all)
+    for (j in seq_len(k)) out[pos[[j]]] <- parts[[j]][[name]]
+    out
+  }
+  res <- data.frame(sim = rep(seq_len(nsim), each = n_all),
+                    group = rep(rep(names(arms), n), nsim),
                     accrual_time = col("accrual_time"),
                     pfs_time = col("pfs_time"), os_time = col("os_time"),
                     progression = col("progression"), response = col("response"),
                     ttr = col("ttr"), dropout_time = col("dropout_time"),
                     stringsAsFactors = FALSE)
-  ord <- order(res$sim, col("group_index"))
-  res <- res[ord, , drop = FALSE]
-  pfs_fu <- pmin(res$dropout_time, col("pfs_cens_time")[ord])
+  pfs_cens <- col("pfs_cens_time")
+  pfs_fu <- if (any(pc > 0)) pmin(res$dropout_time, pfs_cens) else res$dropout_time
   res$pfs_tte <- pmin(res$pfs_time, pfs_fu)
   res$pfs_event <- as.integer(res$pfs_time <= pfs_fu)
   res$os_tte <- pmin(res$os_time, res$dropout_time)
   res$os_event <- as.integer(res$os_time <= res$dropout_time)
   res$pfs_calendar_time <- res$accrual_time + res$pfs_tte
   res$os_calendar_time <- res$accrual_time + res$os_tte
-  res$pfs_cens_time <- col("pfs_cens_time")[ord]
-  res$resp_tau <- col("resp_tau")[ord]
+  res$pfs_cens_time <- pfs_cens
+  taus <- vapply(arms, function(a) as.numeric(a$tau), numeric(1), USE.NAMES = FALSE)
+  res$resp_tau <- rep(rep(unname(taus), n), nsim)
   rownames(res) <- NULL
   res
 }

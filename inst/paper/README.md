@@ -40,6 +40,10 @@ source("inst/paper/data_generation/01_model_quantities.R")
 source("inst/paper/data_generation/02_design_simulation.R")
 source("inst/paper/data_generation/03_two_in_one_simulation.R")
 source("inst/paper/data_generation/04_win_statistics_simulation.R")
+# restart R before measuring the computing time (Table S5): objects left by the
+# earlier scripts can slow down the memory management of R. Measure on mains
+# power with the R window in the foreground and file synchronization paused.
+devtools::load_all()
 source("inst/paper/data_generation/05_computing_time.R")
 source("inst/reproduce/reproduce_published.R")
 source("inst/validation/validate_generator.R")

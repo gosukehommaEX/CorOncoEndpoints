@@ -40,6 +40,8 @@
 * `rOncoEndpoints(stream = )` selects an independent random-number stream for
   simulations in batches.
 * `rOncoEndpoints()` returns the columns `pfs_cens_time` and `resp_tau`.
+* `rOncoEndpoints()` writes the rows of each group directly to their positions
+  instead of sorting all rows, which shortens the generation of many trials.
 * The design functions take the same accrual and dropout arguments as
   `rOncoEndpoints()` and `pfs.cens.hazard` for PFS.
 

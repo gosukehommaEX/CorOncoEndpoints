@@ -12,6 +12,19 @@ test_that("output structure and ordering", {
   expect_true(all(d$accrual_time >= 0 & d$accrual_time <= 12))
 })
 
+test_that("rows are ordered by trial and group for unequal group sizes", {
+  arms <- list(A = arm_A(), B = arm_C(), C = arm_A())
+  n <- c(3, 5, 2)
+  d <- rOncoEndpoints(nsim = 4, n = n, arms = arms, a.time = c(0, 12), seed = 2)
+  expect_equal(nrow(d), 4 * 10)
+  expect_identical(d$sim, rep(1:4, each = 10))
+  expect_identical(d$group, rep(rep(c("A", "B", "C"), n), 4))
+  expect_identical(order(d$sim, match(d$group, names(arms))), seq_len(nrow(d)))
+  expect_identical(d$resp_tau, rep(rep(c(0, 1.5, 0), n), 4))
+  # the second group alone has the time to response
+  expect_identical(is.na(d$ttr) | d$group == "B", rep(TRUE, nrow(d)))
+})
+
 test_that("the same seed reproduces the data and another seed does not", {
   a <- arm_A()
   d1 <- rOncoEndpoints(nsim = 2, n = 50, arms = a, seed = 123)
