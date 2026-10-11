@@ -21,3 +21,8 @@ test_that("invalid inputs give errors", {
   expect_error(CorBoundPFSResponse(orr = 0.3, resp.tau = 1), "exactly one")
   expect_error(CorBoundPFSResponse(orr = 0.9, pfs.median = 1, resp.tau = 2), "smaller")
 })
+
+test_that("outputs of version 0.2.0 are reproduced", {
+  skip_on_cran()
+  reg_compare(reg_bounds(), reg_reference()$bounds, label = "CorBoundPFSResponse")
+})

@@ -10,8 +10,13 @@ rOncoEndpoints(
   arms,
   a.time = NULL,
   a.rate = NULL,
+  a.prop = NULL,
   d.hazard = 0,
-  seed = NULL
+  d.median = NULL,
+  d.time = NULL,
+  pfs.cens.hazard = 0,
+  seed = NULL,
+  stream = NULL
 )
 }
 \arguments{
@@ -24,14 +29,35 @@ labels are taken from the names of the list, otherwise from the
 \code{label} of each object, otherwise \code{"Group1"}, \code{"Group2"},
 and so on.}
 
-\item{a.time}{Accrual breakpoints starting at 0, or \code{NULL}.}
+\item{a.time}{Accrual breakpoints (non-negative and increasing), or
+\code{NULL} for entry of all patients at time 0.}
 
-\item{a.rate}{Relative accrual intensities on the intervals of
-\code{a.time} (default: equal).}
+\item{a.rate}{Absolute accrual rates (patients per unit time over all
+groups), with \code{length(a.time) - 1} or \code{length(a.time)}
+elements; see Details.}
 
-\item{d.hazard}{Dropout hazard, a scalar or one value per group.}
+\item{a.prop}{Proportions of patients enrolled in the intervals of
+\code{a.time}, with \code{length(a.time) - 1} elements. Give at most one
+of \code{a.rate} and \code{a.prop}.}
+
+\item{d.hazard}{Dropout hazard: a scalar or one value per group, or, with
+\code{d.time}, the hazards of the pieces (a numeric vector for all groups
+or a list with one vector per group).}
+
+\item{d.median}{Dropout median, an alternative to \code{d.hazard} with the
+same structure (\code{Inf} for no dropout).}
+
+\item{d.time}{Breakpoints of a piecewise exponential dropout distribution,
+starting at 0 and ending with \code{Inf}: a numeric vector for all groups
+or a list with one vector per group.}
+
+\item{pfs.cens.hazard}{Hazard of an exponential censoring time that censors
+PFS only, a scalar or one value per group (0 for none).}
 
 \item{seed}{Optional integer seed for \code{dqrng::dqset.seed()}.}
+
+\item{stream}{Optional non-negative whole number that selects an independent
+stream of the generator for \code{seed}; requires \code{seed}.}
 }
 \value{
 A data frame with one row per patient, ordered by \code{sim} and
@@ -40,13 +66,16 @@ A data frame with one row per patient, ordered by \code{sim} and
   a progression, 0 if a death), \code{response}, \code{ttr} (time to
   response, \code{NA} unless \code{resp.timing = "ttr"} and the patient
   responded), \code{dropout_time}, \code{pfs_tte}, \code{pfs_event},
-  \code{os_tte}, \code{os_event}, \code{pfs_calendar_time} and
-  \code{os_calendar_time}.
+  \code{os_tte}, \code{os_event}, \code{pfs_calendar_time},
+  \code{os_calendar_time}, \code{pfs_cens_time} (censoring time of PFS,
+  \code{Inf} without \code{pfs.cens.hazard}) and \code{resp_tau} (landmark
+  of the group, used by \code{\link{CutoffData}}).
 }
 \description{
 Generates patient-level progression-free survival (PFS), overall survival
 (OS), objective response and, optionally, time to response for one or more
-treatment groups and many simulated trials, with accrual and dropout.
+treatment groups and many simulated trials, with accrual, dropout and
+censoring of PFS.
 }
 \details{
 Each group is described by an \code{\link{OncoArm}} object; see its Details
@@ -54,17 +83,52 @@ for the model. Random numbers come from the \code{dqrng} generator and the
 transformation runs in C++. For reproducible results set \code{seed}; the
 \code{dqrng} generator is not affected by \code{set.seed()}.
 
-Accrual is piecewise uniform: patients enter independently, with density
-proportional to \code{a.rate} on the intervals defined by \code{a.time}.
-Without \code{a.time} all patients enter at time 0. Dropout is exponential
-with hazard \code{d.hazard} and censors PFS, OS and the observation of
-response.
+\strong{Accrual.} Accrual is piecewise uniform over the intervals defined
+by \code{a.time}, as in the FastSurvival package. Each group has a fixed
+number of patients in each interval: the group size is divided among the
+intervals in proportion to their expected numbers of patients, with the
+remainder going to the intervals with the largest fractional parts, and the
+patients are placed uniformly within their interval. The expected numbers
+are given in one of three ways.
+\itemize{
+  \item \code{a.rate}: absolute rates, in patients per unit time over all
+    groups. With \code{length(a.time) - 1} rates, the rates must accrue the
+    total of \code{n}. With \code{length(a.time)} rates, the last rate applies
+    to an open final interval whose end is computed so that the total of
+    \code{n} is reached; for example, \code{a.time = 0} with
+    \code{a.rate = 20} enrolls 20 patients per unit time until the total is
+    reached.
+  \item \code{a.prop}: the proportions of patients in the intervals.
+  \item Neither: proportional to the lengths of the intervals, that is,
+    uniform accrual from the first to the last element of \code{a.time}.
+}
+\code{a.time} may start after 0, for example for patients enrolled in the
+expansion of a trial. Without \code{a.time} all patients enter at time 0.
+
+\strong{Dropout and censoring of PFS.} Dropout is exponential with hazard
+\code{d.hazard} (or median \code{d.median}), or piecewise exponential with
+breakpoints \code{d.time}, and censors PFS and OS. \code{pfs.cens.hazard}
+adds an exponential censoring time that censors PFS only, for example the
+start of another anticancer therapy before progression, while OS remains
+under follow-up. Both are independent of the endpoints. Whether a response
+is observed before dropout, before the censoring of PFS and before an
+analysis cutoff is determined by \code{\link{CutoffData}}.
+
+\strong{Random numbers.} The groups draw their random numbers in turn. The
+censoring time of PFS is drawn only for groups with a positive
+\code{pfs.cens.hazard}, so that data generated without it do not change.
+With \code{stream}, the generator is seeded with \code{seed} and moved to an
+independent stream, so that batches of simulated trials can be generated
+with the same \code{seed} and different streams, in sequence or in
+parallel.
 
 The latent times \code{pfs_time} and \code{os_time} always satisfy
 \code{pfs_time <= os_time}, with equality when the PFS event is a death
 (\code{progression = 0}). The observed columns \code{pfs_tte},
-\code{pfs_event}, \code{os_tte} and \code{os_event} account for dropout but
-not for an analysis cutoff; use \code{\link{CutoffData}} for that.
+\code{pfs_event}, \code{os_tte} and \code{os_event} account for dropout and
+the censoring of PFS but not for an analysis cutoff, and \code{response} is
+the response of the patient whether or not it would be observed; use
+\code{\link{CutoffData}} for the data observed at an analysis.
 }
 \examples{
 ctl <- OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40,
@@ -75,6 +139,14 @@ dat <- rOncoEndpoints(nsim = 2, n = c(100, 100),
                       arms = list(Control = ctl, Treatment = trt),
                       a.time = c(0, 24), seed = 1)
 head(dat)
+
+# 10 patients per month for 6 months, then 30 per month until 200 patients
+# are enrolled (month 6 + 140 / 30); dropout of 5\% per year (months)
+dat2 <- rOncoEndpoints(nsim = 2, n = c(100, 100),
+                       arms = list(Control = ctl, Treatment = trt),
+                       a.time = c(0, 6), a.rate = c(10, 30),
+                       d.hazard = -log(0.95) / 12, seed = 1)
+range(dat2$accrual_time)
 }
 \seealso{
 \code{\link{OncoArm}}, \code{\link{CutoffData}}

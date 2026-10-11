@@ -9,7 +9,11 @@ ExpectedEvents(
   n,
   a.time = NULL,
   a.rate = NULL,
+  a.prop = NULL,
   d.hazard = 0,
+  d.median = NULL,
+  d.time = NULL,
+  pfs.cens.hazard = 0,
   endpoint = c("os", "pfs"),
   time
 )
@@ -19,9 +23,12 @@ ExpectedEvents(
 
 \item{n}{Sample sizes, one per group.}
 
-\item{a.time, a.rate}{Accrual as in \code{\link{rOncoEndpoints}}.}
+\item{a.time, a.rate, a.prop}{Accrual as in \code{\link{rOncoEndpoints}}.}
 
-\item{d.hazard}{Dropout hazard, a scalar or one value per group.}
+\item{d.hazard, d.median, d.time}{Dropout as in \code{\link{rOncoEndpoints}}.}
+
+\item{pfs.cens.hazard}{Hazard of the censoring of PFS, a scalar or one
+value per group (used for \code{endpoint = "pfs"} only).}
 
 \item{endpoint}{\code{"os"} or \code{"pfs"}.}
 
@@ -34,15 +41,22 @@ A data frame with columns \code{time}, \code{events} (total) and one
 \description{
 Computes the expected number of observed PFS or OS events by given calendar
 times, for groups described by \code{\link{OncoArm}} objects, with
-piecewise-uniform accrual and exponential dropout.
+piecewise-uniform accrual, exponential or piecewise exponential dropout and,
+for PFS, censoring of PFS.
 }
 \details{
 For group \code{j} with \code{n_j} patients, event density \code{f_j},
-dropout hazard \code{d_j} and accrual distribution function \code{A}, the
-expected number of events by calendar time \code{T} is the integral of
-\code{n_j f_j(x) exp(-d_j x) A(T - x)} over follow-up time \code{x} from 0
-to \code{T}. The event densities are tabulated on a grid of 2001 points over
-\code{[0, max(time)]} and the integral is computed by the midpoint rule.
+cumulative dropout hazard \code{D_j} and accrual distribution function
+\code{A}, the expected number of events by calendar time \code{T} is the
+integral of \code{n_j f_j(x) exp(-D_j(x)) A(T - x)} over follow-up time
+\code{x} from 0 to \code{T}; for PFS the integrand is also multiplied by
+\code{exp(-c_j x)}, where \code{c_j} is \code{pfs.cens.hazard}. \code{A} is
+piecewise linear, as specified by \code{a.time}, \code{a.rate} and
+\code{a.prop} in \code{\link{rOncoEndpoints}}; the generated data have a
+fixed number of patients in each accrual interval, which follows \code{A}
+up to rounding. The event densities are tabulated on a grid of 2001 points
+over \code{[0, max(time)]} and the integral is computed by the midpoint
+rule.
 }
 \examples{
 ctl <- OncoArm(pfs.median = 6, orr = 0.3, resp.cor = 0.4, death.prop = 0.15,

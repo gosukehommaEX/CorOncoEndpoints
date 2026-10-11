@@ -9,7 +9,11 @@ AverageHR(
   n,
   a.time = NULL,
   a.rate = NULL,
+  a.prop = NULL,
   d.hazard = 0,
+  d.median = NULL,
+  d.time = NULL,
+  pfs.cens.hazard = 0,
   endpoint = c("os", "pfs"),
   time
 )
@@ -19,9 +23,12 @@ AverageHR(
 
 \item{n}{Sample sizes of the two groups.}
 
-\item{a.time, a.rate}{Accrual as in \code{\link{rOncoEndpoints}}.}
+\item{a.time, a.rate, a.prop}{Accrual as in \code{\link{rOncoEndpoints}}.}
 
-\item{d.hazard}{Dropout hazard, a scalar or one value per group.}
+\item{d.hazard, d.median, d.time}{Dropout as in \code{\link{rOncoEndpoints}}.}
+
+\item{pfs.cens.hazard}{Hazard of the censoring of PFS, a scalar or one
+value per group (used for \code{endpoint = "pfs"} only).}
 
 \item{endpoint}{\code{"os"} or \code{"pfs"}.}
 

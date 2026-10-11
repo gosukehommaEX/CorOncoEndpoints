@@ -29,8 +29,9 @@
 #' AverageHR(list(Control = ctl, Treatment = trt), n = c(350, 350),
 #'           a.time = c(0, 24), endpoint = "os", time = c(24, 36))
 #' @export
-AverageHR <- function(arms, n, a.time = NULL, a.rate = NULL, d.hazard = 0,
-                      endpoint = c("os", "pfs"), time) {
+AverageHR <- function(arms, n, a.time = NULL, a.rate = NULL, a.prop = NULL,
+                      d.hazard = 0, d.median = NULL, d.time = NULL,
+                      pfs.cens.hazard = 0, endpoint = c("os", "pfs"), time) {
   endpoint <- match.arg(endpoint)
   if (!is.list(arms) || inherits(arms, "OncoArm") || length(arms) != 2L) {
     stop("'arms' must be a list of two OncoArm objects (control first).", call. = FALSE)
@@ -38,8 +39,8 @@ AverageHR <- function(arms, n, a.time = NULL, a.rate = NULL, d.hazard = 0,
   if (!is.numeric(time) || any(!is.finite(time)) || any(time <= 0)) {
     stop("'time' must be a numeric vector of positive calendar times.", call. = FALSE)
   }
-  setup <- .design_setup(arms, n, a.time, a.rate, d.hazard, endpoint,
-                         tmax = max(time))
+  setup <- .design_setup(arms, n, a.time, a.rate, a.prop, d.hazard, d.median,
+                         d.time, pfs.cens.hazard, endpoint, tmax = max(time))
   res <- t(vapply(time, function(tcal) {
     v <- .design_integrals(setup, tcal)
     c(v$events, v$ahr)

@@ -3,7 +3,8 @@
 #' @description
 #' Generates patient-level progression-free survival (PFS), overall survival
 #' (OS), objective response and, optionally, time to response for one or more
-#' treatment groups and many simulated trials, with accrual and dropout.
+#' treatment groups and many simulated trials, with accrual, dropout and
+#' censoring of PFS.
 #'
 #' @details
 #' Each group is described by an \code{\link{OncoArm}} object; see its Details
@@ -11,17 +12,52 @@
 #' transformation runs in C++. For reproducible results set \code{seed}; the
 #' \code{dqrng} generator is not affected by \code{set.seed()}.
 #'
-#' Accrual is piecewise uniform: patients enter independently, with density
-#' proportional to \code{a.rate} on the intervals defined by \code{a.time}.
-#' Without \code{a.time} all patients enter at time 0. Dropout is exponential
-#' with hazard \code{d.hazard} and censors PFS, OS and the observation of
-#' response.
+#' \strong{Accrual.} Accrual is piecewise uniform over the intervals defined
+#' by \code{a.time}, as in the FastSurvival package. Each group has a fixed
+#' number of patients in each interval: the group size is divided among the
+#' intervals in proportion to their expected numbers of patients, with the
+#' remainder going to the intervals with the largest fractional parts, and the
+#' patients are placed uniformly within their interval. The expected numbers
+#' are given in one of three ways.
+#' \itemize{
+#'   \item \code{a.rate}: absolute rates, in patients per unit time over all
+#'     groups. With \code{length(a.time) - 1} rates, the rates must accrue the
+#'     total of \code{n}. With \code{length(a.time)} rates, the last rate applies
+#'     to an open final interval whose end is computed so that the total of
+#'     \code{n} is reached; for example, \code{a.time = 0} with
+#'     \code{a.rate = 20} enrolls 20 patients per unit time until the total is
+#'     reached.
+#'   \item \code{a.prop}: the proportions of patients in the intervals.
+#'   \item Neither: proportional to the lengths of the intervals, that is,
+#'     uniform accrual from the first to the last element of \code{a.time}.
+#' }
+#' \code{a.time} may start after 0, for example for patients enrolled in the
+#' expansion of a trial. Without \code{a.time} all patients enter at time 0.
+#'
+#' \strong{Dropout and censoring of PFS.} Dropout is exponential with hazard
+#' \code{d.hazard} (or median \code{d.median}), or piecewise exponential with
+#' breakpoints \code{d.time}, and censors PFS and OS. \code{pfs.cens.hazard}
+#' adds an exponential censoring time that censors PFS only, for example the
+#' start of another anticancer therapy before progression, while OS remains
+#' under follow-up. Both are independent of the endpoints. Whether a response
+#' is observed before dropout, before the censoring of PFS and before an
+#' analysis cutoff is determined by \code{\link{CutoffData}}.
+#'
+#' \strong{Random numbers.} The groups draw their random numbers in turn. The
+#' censoring time of PFS is drawn only for groups with a positive
+#' \code{pfs.cens.hazard}, so that data generated without it do not change.
+#' With \code{stream}, the generator is seeded with \code{seed} and moved to an
+#' independent stream, so that batches of simulated trials can be generated
+#' with the same \code{seed} and different streams, in sequence or in
+#' parallel.
 #'
 #' The latent times \code{pfs_time} and \code{os_time} always satisfy
 #' \code{pfs_time <= os_time}, with equality when the PFS event is a death
 #' (\code{progression = 0}). The observed columns \code{pfs_tte},
-#' \code{pfs_event}, \code{os_tte} and \code{os_event} account for dropout but
-#' not for an analysis cutoff; use \code{\link{CutoffData}} for that.
+#' \code{pfs_event}, \code{os_tte} and \code{os_event} account for dropout and
+#' the censoring of PFS but not for an analysis cutoff, and \code{response} is
+#' the response of the patient whether or not it would be observed; use
+#' \code{\link{CutoffData}} for the data observed at an analysis.
 #'
 #' @param nsim Number of simulated trials.
 #' @param n Integer vector of sample sizes, one per group.
@@ -29,19 +65,37 @@
 #'   labels are taken from the names of the list, otherwise from the
 #'   \code{label} of each object, otherwise \code{"Group1"}, \code{"Group2"},
 #'   and so on.
-#' @param a.time Accrual breakpoints starting at 0, or \code{NULL}.
-#' @param a.rate Relative accrual intensities on the intervals of
-#'   \code{a.time} (default: equal).
-#' @param d.hazard Dropout hazard, a scalar or one value per group.
+#' @param a.time Accrual breakpoints (non-negative and increasing), or
+#'   \code{NULL} for entry of all patients at time 0.
+#' @param a.rate Absolute accrual rates (patients per unit time over all
+#'   groups), with \code{length(a.time) - 1} or \code{length(a.time)}
+#'   elements; see Details.
+#' @param a.prop Proportions of patients enrolled in the intervals of
+#'   \code{a.time}, with \code{length(a.time) - 1} elements. Give at most one
+#'   of \code{a.rate} and \code{a.prop}.
+#' @param d.hazard Dropout hazard: a scalar or one value per group, or, with
+#'   \code{d.time}, the hazards of the pieces (a numeric vector for all groups
+#'   or a list with one vector per group).
+#' @param d.median Dropout median, an alternative to \code{d.hazard} with the
+#'   same structure (\code{Inf} for no dropout).
+#' @param d.time Breakpoints of a piecewise exponential dropout distribution,
+#'   starting at 0 and ending with \code{Inf}: a numeric vector for all groups
+#'   or a list with one vector per group.
+#' @param pfs.cens.hazard Hazard of an exponential censoring time that censors
+#'   PFS only, a scalar or one value per group (0 for none).
 #' @param seed Optional integer seed for \code{dqrng::dqset.seed()}.
+#' @param stream Optional non-negative whole number that selects an independent
+#'   stream of the generator for \code{seed}; requires \code{seed}.
 #' @return A data frame with one row per patient, ordered by \code{sim} and
 #'   group, with columns \code{sim}, \code{group}, \code{accrual_time},
 #'   \code{pfs_time}, \code{os_time}, \code{progression} (1 if the PFS event is
 #'   a progression, 0 if a death), \code{response}, \code{ttr} (time to
 #'   response, \code{NA} unless \code{resp.timing = "ttr"} and the patient
 #'   responded), \code{dropout_time}, \code{pfs_tte}, \code{pfs_event},
-#'   \code{os_tte}, \code{os_event}, \code{pfs_calendar_time} and
-#'   \code{os_calendar_time}.
+#'   \code{os_tte}, \code{os_event}, \code{pfs_calendar_time},
+#'   \code{os_calendar_time}, \code{pfs_cens_time} (censoring time of PFS,
+#'   \code{Inf} without \code{pfs.cens.hazard}) and \code{resp_tau} (landmark
+#'   of the group, used by \code{\link{CutoffData}}).
 #' @examples
 #' ctl <- OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40,
 #'                death.prop = 0.15, os.median = 15, pps.hr.resp = 0.6)
@@ -51,10 +105,20 @@
 #'                       arms = list(Control = ctl, Treatment = trt),
 #'                       a.time = c(0, 24), seed = 1)
 #' head(dat)
+#'
+#' # 10 patients per month for 6 months, then 30 per month until 200 patients
+#' # are enrolled (month 6 + 140 / 30); dropout of 5% per year (months)
+#' dat2 <- rOncoEndpoints(nsim = 2, n = c(100, 100),
+#'                        arms = list(Control = ctl, Treatment = trt),
+#'                        a.time = c(0, 6), a.rate = c(10, 30),
+#'                        d.hazard = -log(0.95) / 12, seed = 1)
+#' range(dat2$accrual_time)
 #' @seealso \code{\link{OncoArm}}, \code{\link{CutoffData}}
 #' @export
 rOncoEndpoints <- function(nsim = 1, n, arms, a.time = NULL, a.rate = NULL,
-                           d.hazard = 0, seed = NULL) {
+                           a.prop = NULL, d.hazard = 0, d.median = NULL,
+                           d.time = NULL, pfs.cens.hazard = 0, seed = NULL,
+                           stream = NULL) {
   if (!is.numeric(nsim) || length(nsim) != 1L || nsim < 1 || nsim != round(nsim)) {
     stop("'nsim' must be a positive integer.", call. = FALSE)
   }
@@ -64,17 +128,22 @@ rOncoEndpoints <- function(nsim = 1, n, arms, a.time = NULL, a.rate = NULL,
     stop("'n' must be a vector of positive integers with one element per group.",
          call. = FALSE)
   }
-  if (!is.numeric(d.hazard) || !(length(d.hazard) %in% c(1L, k)) ||
-      any(!is.finite(d.hazard)) || any(d.hazard < 0)) {
-    stop("'d.hazard' must be a non-negative number or one per group.", call. = FALSE)
-  }
   if (nsim * max(n) > .Machine$integer.max) {
     stop("'nsim' times the largest group size must not exceed ",
          .Machine$integer.max, "; generate the trials in batches.", call. = FALSE)
   }
-  d.hazard <- rep_len(d.hazard, k)
-  acc <- .accrual_setup(a.time, a.rate)
-  if (!is.null(seed)) dqrng::dqset.seed(seed)
+  acc <- .accrual_setup(a.time, a.rate, a.prop, sum(n))
+  dsp <- .dropout_setup(d.hazard, d.median, d.time, k)
+  pc <- .group_rates(pfs.cens.hazard, k, "pfs.cens.hazard")
+  if (!is.null(stream)) {
+    if (is.null(seed)) stop("'stream' requires 'seed'.", call. = FALSE)
+    if (!is.numeric(stream) || length(stream) != 1L || !is.finite(stream) ||
+        stream < 0 || stream != round(stream) || stream > .Machine$integer.max) {
+      stop("'stream' must be a non-negative whole number.", call. = FALSE)
+    }
+    stream <- as.integer(stream)
+  }
+  if (!is.null(seed)) dqrng::dqset.seed(seed, stream = stream)
 
   parts <- vector("list", k)
   for (j in seq_len(k)) {
@@ -91,7 +160,10 @@ rOncoEndpoints <- function(nsim = 1, n, arms, a.time = NULL, a.rate = NULL,
       grid_h = if (expexp) a$grid$h else 1,
       ttr_mode = if (a$resp.timing == "ttr") 1L else 0L,
       ttr_rate = if (a$resp.timing == "ttr") a$ttr_rate else 1,
-      a_time = acc$time, a_cum = acc$cum, d_hazard = d.hazard[j])
+      a_time = acc$time, a_counts = .accrual_counts(n[j], acc$prob),
+      d_time = dsp[[j]]$time, d_hazard = dsp[[j]]$hazard, d_cum = dsp[[j]]$cum,
+      pc_hazard = pc[j])
+    out$resp_tau <- rep(a$tau, length(out$sim))
     out$group <- rep(names(arms)[j], length(out$sim))
     out$group_index <- rep(j, length(out$sim))
     parts[[j]] <- out
@@ -105,12 +177,15 @@ rOncoEndpoints <- function(nsim = 1, n, arms, a.time = NULL, a.rate = NULL,
                     stringsAsFactors = FALSE)
   ord <- order(res$sim, col("group_index"))
   res <- res[ord, , drop = FALSE]
-  res$pfs_tte <- pmin(res$pfs_time, res$dropout_time)
-  res$pfs_event <- as.integer(res$pfs_time <= res$dropout_time)
+  pfs_fu <- pmin(res$dropout_time, col("pfs_cens_time")[ord])
+  res$pfs_tte <- pmin(res$pfs_time, pfs_fu)
+  res$pfs_event <- as.integer(res$pfs_time <= pfs_fu)
   res$os_tte <- pmin(res$os_time, res$dropout_time)
   res$os_event <- as.integer(res$os_time <= res$dropout_time)
   res$pfs_calendar_time <- res$accrual_time + res$pfs_tte
   res$os_calendar_time <- res$accrual_time + res$os_tte
+  res$pfs_cens_time <- col("pfs_cens_time")[ord]
+  res$resp_tau <- col("resp_tau")[ord]
   rownames(res) <- NULL
   res
 }

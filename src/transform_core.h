@@ -12,6 +12,8 @@
 //           tabulated on a uniform grid and extended linearly with slope lam_o
 //   OS   = PFS (death first) or the post-progression death time
 //   TTR  = tau + Exp(ttr_rate) truncated to [0, PFS - tau) for responders
+// Helpers give the accrual time (piecewise uniform, fixed number of patients
+// per interval) and piecewise exponential times such as the dropout time.
 
 #ifndef CORONCO_TRANSFORM_CORE_H
 #define CORONCO_TRANSFORM_CORE_H
@@ -87,21 +89,23 @@ inline double cumhaz_inverse(double y, const ArmParams& p) {
   return (lo + f) * p.grid_h;
 }
 
-// Piecewise-uniform accrual: breakpoints a_time[0..k] and cumulative
-// probabilities a_cum[0..k] with a_cum[0] = 0 and a_cum[k] = 1
-inline double accrual_inverse(double u, const double* a_time, const double* a_cum, int k) {
-  if (k <= 0) return 0.0;
-  for (int j = 0; j < k; ++j) {
-    const double lo = a_cum[j];
-    const double hi = a_cum[j + 1];
-    if (hi > lo && (u < hi || j == k - 1)) {
-      double f = (u - lo) / (hi - lo);
-      if (f < 0.0) f = 0.0;
-      if (f > 1.0) f = 1.0;
-      return a_time[j] + f * (a_time[j + 1] - a_time[j]);
-    }
-  }
-  return a_time[k];
+// Piecewise-uniform accrual with a fixed number of patients per interval: a
+// patient of interval j enters at a_time[j] + u (a_time[j + 1] - a_time[j])
+inline double accrual_position(double u, int j, const double* a_time) {
+  return a_time[j] + u * (a_time[j + 1] - a_time[j]);
+}
+
+// Piecewise exponential time from a unit exponential e. The k pieces start at
+// t[0] = 0 < t[1] < ... < t[k - 1], have hazards h[0..k-1], and cum[i] is the
+// cumulative hazard at t[i]. One piece gives e / h[0]. A zero hazard in the
+// last piece gives an infinite time when e exceeds the cumulative hazard
+// reached before it.
+inline double piecewise_exp_inverse(double e, const double* t, const double* h,
+                                    const double* cum, int k) {
+  int i = k - 1;
+  while (i > 0 && cum[i] > e) --i;
+  if (!(h[i] > 0.0)) return std::numeric_limits<double>::infinity();
+  return t[i] + (e - cum[i]) / h[i];
 }
 
 // Transform the random inputs of one patient

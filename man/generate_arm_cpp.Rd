@@ -23,8 +23,11 @@ generate_arm_cpp(
   ttr_mode,
   ttr_rate,
   a_time,
-  a_cum,
-  d_hazard
+  a_counts,
+  d_time,
+  d_hazard,
+  d_cum,
+  pc_hazard
 )
 }
 \arguments{
@@ -45,9 +48,16 @@ model and its tabulated cumulative post-progression hazard.}
 
 \item{ttr_rate}{Rate of the untruncated time to response.}
 
-\item{a_time, a_cum}{Accrual breakpoints and cumulative probabilities.}
+\item{a_time}{Accrual breakpoints.}
 
-\item{d_hazard}{Dropout hazard (0 for no dropout).}
+\item{a_counts}{Number of patients of the group in each accrual interval
+(empty when all patients enter at \code{a_time[1]}).}
+
+\item{d_time, d_hazard, d_cum}{Left ends, hazards and cumulative hazards of
+the pieces of the dropout distribution (one piece for exponential
+dropout; a zero hazard for no dropout).}
+
+\item{pc_hazard}{Hazard of the censoring of PFS (0 for none).}
 }
 \value{
 A list of vectors.
@@ -58,7 +68,9 @@ drawn from the \code{dqrng} generator in the following order, each as one
 block of \code{nsim * n} values: latent PFS score, independent normal for
 response, uniform for the type of the PFS event, standard exponential for
 post-progression survival, uniform for the time to response, uniform for
-accrual, standard exponential for dropout. The draws are then transformed
-by \code{coronco::transform_one()} (see \code{transform_core.h}).
+accrual, standard exponential for dropout, and, only when
+\code{pc_hazard > 0}, standard exponential for the censoring of PFS. The
+draws are then transformed by \code{coronco::transform_one()} (see
+\code{transform_core.h}).
 }
 \keyword{internal}

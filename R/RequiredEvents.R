@@ -17,6 +17,9 @@
 #' and the average hazard ratio is recomputed at that time until the rounded
 #' number of events no longer changes. For exponential PFS in both groups the
 #' hazard ratio is constant and the result is the usual Schoenfeld number.
+#' The derivation assumes the same censoring distribution in the two groups;
+#' with unequal dropout or censoring of PFS the formula is a further
+#' approximation.
 #'
 #' @inheritParams AverageHR
 #' @param alpha One-sided significance level.
@@ -35,9 +38,10 @@
 #' RequiredEvents(list(Control = ctl, Treatment = trt), n = c(350, 350),
 #'                a.time = c(0, 24), endpoint = "os")
 #' @export
-RequiredEvents <- function(arms, n, a.time = NULL, a.rate = NULL, d.hazard = 0,
-                           endpoint = c("os", "pfs"), alpha = 0.025, power = 0.8,
-                           tmax = NULL) {
+RequiredEvents <- function(arms, n, a.time = NULL, a.rate = NULL, a.prop = NULL,
+                           d.hazard = 0, d.median = NULL, d.time = NULL,
+                           pfs.cens.hazard = 0, endpoint = c("os", "pfs"),
+                           alpha = 0.025, power = 0.8, tmax = NULL) {
   endpoint <- match.arg(endpoint)
   if (!is.list(arms) || inherits(arms, "OncoArm") || length(arms) != 2L) {
     stop("'arms' must be a list of two OncoArm objects (control first).", call. = FALSE)
@@ -46,12 +50,13 @@ RequiredEvents <- function(arms, n, a.time = NULL, a.rate = NULL, d.hazard = 0,
     stop("'alpha' must be in (0, 0.5) and 'power' in (0, 1).", call. = FALSE)
   }
   if (is.null(tmax)) {
-    a_end <- if (is.null(a.time)) 0 else max(a.time)
+    a_end <- max(.accrual_setup(a.time, a.rate, a.prop, sum(n))$time)
     meds <- vapply(.check_arms(arms), QuantileEndpoint, numeric(1), prob = 0.5,
                    endpoint = endpoint)
     tmax <- a_end + 10 * max(meds)
   }
-  setup <- .design_setup(arms, n, a.time, a.rate, d.hazard, endpoint, tmax = tmax)
+  setup <- .design_setup(arms, n, a.time, a.rate, a.prop, d.hazard, d.median,
+                         d.time, pfs.cens.hazard, endpoint, tmax = tmax)
   ev <- function(tcal) .design_integrals(setup, tcal)$events
   e_max <- ev(tmax)
   r1 <- n[1] / sum(n)

@@ -4,8 +4,9 @@
 #' calendar time \code{tcal}. The weight of follow-up time \code{x} is the
 #' expected number of events at \code{x} among patients who entered at least
 #' \code{x} before \code{tcal}:
-#' \code{n_j f_j(x) exp(-d_j x) A(tcal - x)}, where \code{A} is the accrual
-#' distribution function.
+#' \code{n_j f_j(x) exp(-D_j(x) - c_j x) A(tcal - x)}, where \code{D_j} is the
+#' cumulative dropout hazard, \code{c_j} the hazard of the censoring of PFS
+#' (0 for OS) and \code{A} the accrual distribution function.
 #'
 #' @param setup Output of \code{.design_setup()}.
 #' @param tcal Calendar time.
@@ -31,7 +32,8 @@
     g <- setup$grids[[j]]
     fm <- stats::approx(g$t, g$f, xout = mid)$y
     hm <- stats::approx(g$t, g$h, xout = mid)$y
-    w_list[[j]] <- setup$n[j] * fm * exp(-setup$d[j] * mid) * a_w
+    w_list[[j]] <- setup$n[j] * fm * exp(-.piecewise_cumhaz(mid, setup$drop[[j]])) * a_w
+    if (setup$pc[j] > 0) w_list[[j]] <- w_list[[j]] * exp(-setup$pc[j] * mid)
     h_list[[j]] <- hm
     by_group[j] <- sum(w_list[[j]] * width)
   }

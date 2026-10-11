@@ -77,3 +77,21 @@ test_that("invalid inputs give errors", {
   expect_error(OncoArm(pfs.median = 6, orr = 0.3, resp.cor = 0.4, death.prop = NA,
                        os.median = 15), "death.prop")
 })
+
+test_that("calibration and properties of version 0.2.0 are reproduced (part 1)", {
+  skip_on_cran()
+  ref <- reg_reference()$properties
+  arms <- reg_arms()
+  for (nm in names(ref)[1:4]) {
+    reg_compare(reg_properties(arms[nm])[[nm]], ref[[nm]], label = nm)
+  }
+})
+
+test_that("calibration and properties of version 0.2.0 are reproduced (part 2)", {
+  skip_on_cran()
+  ref <- reg_reference()$properties
+  arms <- reg_arms()
+  for (nm in names(ref)[5:8]) {
+    reg_compare(reg_properties(arms[nm])[[nm]], ref[[nm]], label = nm)
+  }
+})

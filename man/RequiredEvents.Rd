@@ -9,7 +9,11 @@ RequiredEvents(
   n,
   a.time = NULL,
   a.rate = NULL,
+  a.prop = NULL,
   d.hazard = 0,
+  d.median = NULL,
+  d.time = NULL,
+  pfs.cens.hazard = 0,
   endpoint = c("os", "pfs"),
   alpha = 0.025,
   power = 0.8,
@@ -21,9 +25,12 @@ RequiredEvents(
 
 \item{n}{Sample sizes of the two groups.}
 
-\item{a.time, a.rate}{Accrual as in \code{\link{rOncoEndpoints}}.}
+\item{a.time, a.rate, a.prop}{Accrual as in \code{\link{rOncoEndpoints}}.}
 
-\item{d.hazard}{Dropout hazard, a scalar or one value per group.}
+\item{d.hazard, d.median, d.time}{Dropout as in \code{\link{rOncoEndpoints}}.}
+
+\item{pfs.cens.hazard}{Hazard of the censoring of PFS, a scalar or one
+value per group (used for \code{endpoint = "pfs"} only).}
 
 \item{endpoint}{\code{"os"} or \code{"pfs"}.}
 
@@ -57,6 +64,9 @@ analysis time is the calendar time at which \code{D} events are expected,
 and the average hazard ratio is recomputed at that time until the rounded
 number of events no longer changes. For exponential PFS in both groups the
 hazard ratio is constant and the result is the usual Schoenfeld number.
+The derivation assumes the same censoring distribution in the two groups;
+with unequal dropout or censoring of PFS the formula is a further
+approximation.
 }
 \examples{
 ctl <- OncoArm(pfs.median = 6, orr = 0.3, resp.cor = 0.4, death.prop = 0.15,

@@ -40,4 +40,10 @@ for k, kw in scen.items():
           "ttr NaN pattern equal", bool(np.all(np.isnan(out[:, 4]) == np.isnan(ttr))))
     print("   extreme z1 rows pfs:", out[:6, 0], "python:", pfs[:6])
 acc = np.loadtxt("acc.txt")
-print("accrual inverse:", acc[:, 1].tolist())
+u = acc[:, 0]
+e = 4.0 * u
+pw = np.where(e < 0.6, e / 0.1, 6.0 + (e - 0.6) / 0.02)
+print("accrual max diff: interval 1 %.2e, interval 2 %.2e" % (np.max(np.abs(acc[:, 1] - 6.0 * u)),
+      np.max(np.abs(acc[:, 2] - (6.0 + 18.0 * u)))))
+print("piecewise exponential max diff: two pieces %.2e, one piece %.2e (exact %s)" % (
+      np.max(np.abs(acc[:, 3] - pw)), np.max(np.abs(acc[:, 4] - e / 0.05)), bool(np.all(acc[:, 4] == e / 0.05))))

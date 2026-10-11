@@ -25,13 +25,24 @@ int main(int argc, char** argv) {
     std::fprintf(fo, "%.17g %.17g %d %d %.17g\n", pfs, os, prog, resp, ttr);
   }
   std::fclose(fo);
-  // accrual check
+  // accrual and piecewise exponential checks: u, accrual time in interval 0
+  // and 1 of [0, 6, 24], and the piecewise exponential time for e = 4 u with
+  // pieces [0, 6) and [6, Inf), hazards 0.1 and 0.02, and for a single
+  // hazard 0.05
   double at[3] = {0.0, 6.0, 24.0};
-  double ac[3] = {0.0, 0.25, 1.0};
+  double pt[2] = {0.0, 6.0};
+  double ph[2] = {0.1, 0.02};
+  double pc[2] = {0.0, 0.6};
+  double st[1] = {0.0};
+  double sh[1] = {0.05};
+  double sc[1] = {0.0};
   std::FILE* fa = std::fopen(argv[5], "w");
   for (int i = 0; i <= 20; ++i) {
     double u = i / 20.0;
-    std::fprintf(fa, "%.17g %.17g\n", u, coronco::accrual_inverse(u, at, ac, 2));
+    std::fprintf(fa, "%.17g %.17g %.17g %.17g %.17g\n", u,
+                 coronco::accrual_position(u, 0, at), coronco::accrual_position(u, 1, at),
+                 coronco::piecewise_exp_inverse(4.0 * u, pt, ph, pc, 2),
+                 coronco::piecewise_exp_inverse(4.0 * u, st, sh, sc, 1));
   }
   std::fclose(fa);
   return 0;

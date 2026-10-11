@@ -20,7 +20,7 @@ A numeric vector with one value per simulated trial (\code{NA} when
 \description{
 Returns, for each simulated trial, the calendar time at which the given
 number of observed PFS or OS events is reached. Events censored by dropout
-are not counted. The result can be passed to \code{\link{CutoffData}} for
+or, for PFS, by the censoring of PFS are not counted. The result can be passed to \code{\link{CutoffData}} for
 event-driven analyses.
 }
 \examples{

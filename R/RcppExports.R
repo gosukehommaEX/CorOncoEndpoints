@@ -8,8 +8,10 @@
 #' block of \code{nsim * n} values: latent PFS score, independent normal for
 #' response, uniform for the type of the PFS event, standard exponential for
 #' post-progression survival, uniform for the time to response, uniform for
-#' accrual, standard exponential for dropout. The draws are then transformed
-#' by \code{coronco::transform_one()} (see \code{transform_core.h}).
+#' accrual, standard exponential for dropout, and, only when
+#' \code{pc_hazard > 0}, standard exponential for the censoring of PFS. The
+#' draws are then transformed by \code{coronco::transform_one()} (see
+#' \code{transform_core.h}).
 #'
 #' @param nsim Number of simulated trials.
 #' @param n Number of patients per trial in this group.
@@ -20,11 +22,16 @@
 #'   model and its tabulated cumulative post-progression hazard.
 #' @param ttr_mode 1 to generate the time to response.
 #' @param ttr_rate Rate of the untruncated time to response.
-#' @param a_time,a_cum Accrual breakpoints and cumulative probabilities.
-#' @param d_hazard Dropout hazard (0 for no dropout).
+#' @param a_time Accrual breakpoints.
+#' @param a_counts Number of patients of the group in each accrual interval
+#'   (empty when all patients enter at \code{a_time[1]}).
+#' @param d_time,d_hazard,d_cum Left ends, hazards and cumulative hazards of
+#'   the pieces of the dropout distribution (one piece for exponential
+#'   dropout; a zero hazard for no dropout).
+#' @param pc_hazard Hazard of the censoring of PFS (0 for none).
 #' @return A list of vectors.
 #' @keywords internal
-generate_arm_cpp <- function(nsim, n, lam_p, theta, c_resp, z_tau, tau, os_model, pi_death, gam0, gam1, lam_o, c_dec, grid_g, grid_h, ttr_mode, ttr_rate, a_time, a_cum, d_hazard) {
-    .Call(`_CorOncoEndpoints_generate_arm_cpp`, nsim, n, lam_p, theta, c_resp, z_tau, tau, os_model, pi_death, gam0, gam1, lam_o, c_dec, grid_g, grid_h, ttr_mode, ttr_rate, a_time, a_cum, d_hazard)
+generate_arm_cpp <- function(nsim, n, lam_p, theta, c_resp, z_tau, tau, os_model, pi_death, gam0, gam1, lam_o, c_dec, grid_g, grid_h, ttr_mode, ttr_rate, a_time, a_counts, d_time, d_hazard, d_cum, pc_hazard) {
+    .Call(`_CorOncoEndpoints_generate_arm_cpp`, nsim, n, lam_p, theta, c_resp, z_tau, tau, os_model, pi_death, gam0, gam1, lam_o, c_dec, grid_g, grid_h, ttr_mode, ttr_rate, a_time, a_counts, d_time, d_hazard, d_cum, pc_hazard)
 }
 
