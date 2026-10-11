@@ -2,7 +2,8 @@
 
 Prints the calibrated parameters of a treatment group together with the
 implied medians of PFS and OS (overall and by response) and the implied
-Pearson correlations among PFS, OS and response.
+Pearson correlations among PFS, OS and response, for the endpoints that
+the group has.
 
 ## Usage
 

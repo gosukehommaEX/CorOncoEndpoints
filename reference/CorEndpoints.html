@@ -90,6 +90,10 @@ score of PFS.</p>
 <p>For <code>os.model = "expexp"</code>, the variances are those of the exponential
 distributions, and the covariances are computed from the expected
 post-progression survival given the progression time, which is tabulated.</p>
+<p>For a group with two endpoints (see <code><a href="OncoArm.html">OncoArm</a></code>), the correlations
+that involve the missing endpoint are <code>NA</code>; with
+<code>endpoints = c("os", "response")</code>, <code>cor.os.resp</code> is computed as
+<code>Corr(PFS, R)</code> is for PFS.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

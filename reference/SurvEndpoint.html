@@ -98,7 +98,10 @@ OS with <code>os.model = "idm"</code> and <code>pps.hr.resp = 1</code>, the surv
 function of all patients has the closed form of Fleischer et al. (2009,
 Theorem 5); otherwise the contribution of patients who progressed is a
 one-dimensional integral over the progression time. For
-<code>os.model = "expexp"</code>, OS of all patients is exponential.</p>
+<code>os.model = "expexp"</code>, OS of all patients is exponential. With
+<code>endpoints = c("os", "response")</code> in <code><a href="OncoArm.html">OncoArm</a></code>, OS is
+exponential and its survival function among responders has the form of that
+of PFS.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

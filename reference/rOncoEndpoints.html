@@ -197,7 +197,10 @@ parallel.</p>
 <code>pfs_event</code>, <code>os_tte</code> and <code>os_event</code> account for dropout and
 the censoring of PFS but not for an analysis cutoff, and <code>response</code> is
 the response of the patient whether or not it would be observed; use
-<code><a href="CutoffData.html">CutoffData</a></code> for the data observed at an analysis.</p>
+<code><a href="CutoffData.html">CutoffData</a></code> for the data observed at an analysis. For groups
+with two endpoints (<code>endpoints</code> in <code><a href="OncoArm.html">OncoArm</a></code>), the columns
+of the missing endpoint are <code>NA</code>; all groups must have the same
+endpoints.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

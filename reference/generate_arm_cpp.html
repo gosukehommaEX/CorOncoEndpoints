@@ -94,7 +94,8 @@ draws are then transformed by <code>coronco::transform_one()</code> (see
 <span>  <span class="va">d_time</span>,</span>
 <span>  <span class="va">d_hazard</span>,</span>
 <span>  <span class="va">d_cum</span>,</span>
-<span>  <span class="va">pc_hazard</span></span>
+<span>  <span class="va">pc_hazard</span>,</span>
+<span>  <span class="va">ep_mode</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -152,6 +153,13 @@ dropout; a zero hazard for no dropout).</p></dd>
 
 <dt id="arg-pc-hazard">pc_hazard<a class="anchor" aria-label="anchor" href="#arg-pc-hazard"></a></dt>
 <dd><p>Hazard of the censoring of PFS (0 for none).</p></dd>
+
+
+<dt id="arg-ep-mode">ep_mode<a class="anchor" aria-label="anchor" href="#arg-ep-mode"></a></dt>
+<dd><p>Endpoints of the group: 0 for all three, 1 for PFS and OS
+(response is <code>NA</code>), 2 for PFS and response (OS is <code>NA</code>), 3 for
+OS and response (the exponential time linked to response is OS, and PFS
+is <code>NA</code>). The random numbers drawn do not depend on <code>ep_mode</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

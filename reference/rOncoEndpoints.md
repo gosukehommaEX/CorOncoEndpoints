@@ -156,7 +156,11 @@ The latent times `pfs_time` and `os_time` always satisfy
 not for an analysis cutoff, and `response` is the response of the
 patient whether or not it would be observed; use
 [`CutoffData`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/CutoffData.md)
-for the data observed at an analysis.
+for the data observed at an analysis. For groups with two endpoints
+(`endpoints` in
+[`OncoArm`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/OncoArm.md)),
+the columns of the missing endpoint are `NA`; all groups must have the
+same endpoints.
 
 ## See also
 

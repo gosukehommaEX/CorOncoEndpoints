@@ -50,7 +50,11 @@ response rate. For OS with `os.model = "idm"` and `pps.hr.resp = 1`, the
 survival function of all patients has the closed form of Fleischer et
 al. (2009, Theorem 5); otherwise the contribution of patients who
 progressed is a one-dimensional integral over the progression time. For
-`os.model = "expexp"`, OS of all patients is exponential.
+`os.model = "expexp"`, OS of all patients is exponential. With
+`endpoints = c("os", "response")` in
+[`OncoArm`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/OncoArm.md),
+OS is exponential and its survival function among responders has the
+form of that of PFS.
 
 ## References
 

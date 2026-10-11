@@ -42,6 +42,12 @@ distributions, and the covariances are computed from the expected
 post-progression survival given the progression time, which is
 tabulated.
 
+For a group with two endpoints (see
+[`OncoArm`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/OncoArm.md)),
+the correlations that involve the missing endpoint are `NA`; with
+`endpoints = c("os", "response")`, `cor.os.resp` is computed as
+`Corr(PFS, R)` is for PFS.
+
 ## References
 
 Fleischer, F., Gaschler-Markefski, B. and Bluhmki, E. (2009). A

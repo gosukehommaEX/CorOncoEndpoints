@@ -37,7 +37,8 @@ generate_arm_cpp(
   d_time,
   d_hazard,
   d_cum,
-  pc_hazard
+  pc_hazard,
+  ep_mode
 )
 ```
 
@@ -94,6 +95,13 @@ generate_arm_cpp(
 - pc_hazard:
 
   Hazard of the censoring of PFS (0 for none).
+
+- ep_mode:
+
+  Endpoints of the group: 0 for all three, 1 for PFS and OS (response is
+  `NA`), 2 for PFS and response (OS is `NA`), 3 for OS and response (the
+  exponential time linked to response is OS, and PFS is `NA`). The
+  random numbers drawn do not depend on `ep_mode`.
 
 ## Value
 
