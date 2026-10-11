@@ -117,7 +117,12 @@ data.frame(cutpoint = cutpoints,
 ```
 
 With `r nsim` simulated trials, the Monte Carlo standard error of a type I
-error rate near 0.025 is about `r round(sqrt(0.025 * 0.975 / nsim), 3)`. At the
+error rate near 0.025 is about `r round(sqrt(0.025 * 0.975 / nsim), 3)`. For a
+large cutpoint almost no trial is expanded, and the rate approaches the
+proportion of trials with `Y > w`, here `r round(mean(Y > w), 3)`, which differs
+from 0.025 by `r round(abs(mean(Y > w) - 0.025) / sqrt(0.025 * 0.975 / nsim), 1)`
+standard errors; for a small cutpoint it approaches the proportion with
+`Z > w`, here `r round(mean(Z > w), 3)`. At the
 cutpoint 1.645, `r round(100 * mean(X >= 1.645))`% of the trials were expanded,
 and the estimated type I error rate was `r round(type1(1.645), 3)`. A stronger
 association of response with OS, for example through a longer survival of

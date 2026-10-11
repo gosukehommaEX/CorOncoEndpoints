@@ -87,6 +87,10 @@ m6 <- mean_props(0.6)
 round(rbind("Corr(PFS, R) = 0" = m0, "Corr(PFS, R) = 0.6" = m6), 4)
 ```
 
+Both scenarios use the same seed. PFS and OS are then the same in the two
+scenarios and only the responses differ, so the proportions won and lost on OS
+and PFS are the same.
+
 ## Overall proportions and the power formula
 
 The overall proportions from the jointly generated endpoints are compared
@@ -120,14 +124,14 @@ round(s6, 3)
 ```
 
 With `Corr(PFS, R) = 0`, the joint proportions give a win ratio of
-`r round(s0["joint", "win_ratio"], 2)` and a calculated power of
-`r round(s0["joint", "power"], 2)`, and the independence assumption gives
-`r round(s0["independence", "win_ratio"], 2)` and
-`r round(s0["independence", "power"], 2)`. With `Corr(PFS, R) = 0.6`, the
-corresponding values are `r round(s6["joint", "win_ratio"], 2)` and
-`r round(s6["joint", "power"], 2)` for the joint proportions and
-`r round(s6["independence", "win_ratio"], 2)` and
-`r round(s6["independence", "power"], 2)` under independence. Response is
+`r sprintf("%.2f", s0["joint", "win_ratio"])` and a calculated power of
+`r sprintf("%.2f", s0["joint", "power"])`, and the independence assumption gives
+`r sprintf("%.2f", s0["independence", "win_ratio"])` and
+`r sprintf("%.2f", s0["independence", "power"])`. With `Corr(PFS, R) = 0.6`, the
+corresponding values are `r sprintf("%.2f", s6["joint", "win_ratio"])` and
+`r sprintf("%.2f", s6["joint", "power"])` for the joint proportions and
+`r sprintf("%.2f", s6["independence", "win_ratio"])` and
+`r sprintf("%.2f", s6["independence", "power"])` under independence. Response is
 consulted only for pairs tied on OS and PFS, so its contribution depends on how
 response is associated with PFS. Here 200 simulated trials per scenario
 were used; more trials, or the variance of the log win ratio estimated from
