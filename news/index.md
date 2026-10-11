@@ -53,6 +53,9 @@
   stream for simulations in batches.
 - [`rOncoEndpoints()`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/rOncoEndpoints.md)
   returns the columns `pfs_cens_time` and `resp_tau`.
+- [`rOncoEndpoints()`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/rOncoEndpoints.md)
+  writes the rows of each group directly to their positions instead of
+  sorting all rows, which shortens the generation of many trials.
 - The design functions take the same accrual and dropout arguments as
   [`rOncoEndpoints()`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/rOncoEndpoints.md)
   and `pfs.cens.hazard` for PFS.
