@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/gosukehommaEX/CorOncoEndpoints/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/gosukehommaEX/CorOncoEndpoints/blob/v0.2.0/DESCRIPTION)
 
 Homma G (2026). *CorOncoEndpoints: Correlated Progression-Free Survival,
 Overall Survival and Objective Response for Oncology Trial Simulation*.
