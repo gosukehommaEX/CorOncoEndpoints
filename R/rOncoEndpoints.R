@@ -57,7 +57,10 @@
 #' \code{pfs_event}, \code{os_tte} and \code{os_event} account for dropout and
 #' the censoring of PFS but not for an analysis cutoff, and \code{response} is
 #' the response of the patient whether or not it would be observed; use
-#' \code{\link{CutoffData}} for the data observed at an analysis.
+#' \code{\link{CutoffData}} for the data observed at an analysis. For groups
+#' with two endpoints (\code{endpoints} in \code{\link{OncoArm}}), the columns
+#' of the missing endpoint are \code{NA}; all groups must have the same
+#' endpoints.
 #'
 #' @param nsim Number of simulated trials.
 #' @param n Integer vector of sample sizes, one per group.
@@ -128,6 +131,14 @@ rOncoEndpoints <- function(nsim = 1, n, arms, a.time = NULL, a.rate = NULL,
     stop("'n' must be a vector of positive integers with one element per group.",
          call. = FALSE)
   }
+  eps <- lapply(arms, .arm_endpoints)
+  if (!all(vapply(eps, identical, logical(1), eps[[1]]))) {
+    stop("All groups must have the same 'endpoints'.", call. = FALSE)
+  }
+  ep <- eps[[1]]
+  # 0: all three endpoints; 1: no response; 2: no OS; 3: no PFS
+  ep_mode <- if (length(ep) == 3L) 0L else if (!"response" %in% ep) 1L else
+    if (!"os" %in% ep) 2L else 3L
   if (nsim * max(n) > .Machine$integer.max) {
     stop("'nsim' times the largest group size must not exceed ",
          .Machine$integer.max, "; generate the trials in batches.", call. = FALSE)
@@ -135,6 +146,9 @@ rOncoEndpoints <- function(nsim = 1, n, arms, a.time = NULL, a.rate = NULL,
   acc <- .accrual_setup(a.time, a.rate, a.prop, sum(n))
   dsp <- .dropout_setup(d.hazard, d.median, d.time, k)
   pc <- .group_rates(pfs.cens.hazard, k, "pfs.cens.hazard")
+  if (!"pfs" %in% ep && any(pc > 0)) {
+    stop("'pfs.cens.hazard' requires PFS in 'endpoints'.", call. = FALSE)
+  }
   if (!is.null(stream)) {
     if (is.null(seed)) stop("'stream' requires 'seed'.", call. = FALSE)
     if (!is.numeric(stream) || length(stream) != 1L || !is.finite(stream) ||
@@ -148,13 +162,14 @@ rOncoEndpoints <- function(nsim = 1, n, arms, a.time = NULL, a.rate = NULL,
   parts <- vector("list", k)
   for (j in seq_len(k)) {
     a <- arms[[j]]
+    idm <- a$os.model == "idm"
     expexp <- a$os.model == "expexp"
     out <- generate_arm_cpp(
       nsim = as.integer(nsim), n = as.integer(n[j]),
       lam_p = a$lam_p, theta = a$theta, c_resp = a$c_resp, z_tau = a$z_tau,
       tau = a$tau, os_model = if (expexp) 1L else 0L,
-      pi_death = a$death.prop,
-      gam0 = if (expexp) 1 else a$gam0, gam1 = if (expexp) 1 else a$gam1,
+      pi_death = if (idm || expexp) a$death.prop else 0,
+      gam0 = if (idm) a$gam0 else 1, gam1 = if (idm) a$gam1 else 1,
       lam_o = if (expexp) a$lam_o else 1, c_dec = if (expexp) a$c_dec else 0,
       grid_g = if (expexp) a$grid$G else c(0, 0),
       grid_h = if (expexp) a$grid$h else 1,
@@ -162,7 +177,7 @@ rOncoEndpoints <- function(nsim = 1, n, arms, a.time = NULL, a.rate = NULL,
       ttr_rate = if (a$resp.timing == "ttr") a$ttr_rate else 1,
       a_time = acc$time, a_counts = .accrual_counts(n[j], acc$prob),
       d_time = dsp[[j]]$time, d_hazard = dsp[[j]]$hazard, d_cum = dsp[[j]]$cum,
-      pc_hazard = pc[j])
+      pc_hazard = pc[j], ep_mode = ep_mode)
     out$resp_tau <- rep(a$tau, length(out$sim))
     out$group <- rep(names(arms)[j], length(out$sim))
     out$group_index <- rep(j, length(out$sim))

@@ -49,3 +49,12 @@ test_that("TrialSimulator documented medians (4.62 and 9.61) are reproduced", {
 test_that("invalid probabilities give errors", {
   expect_error(QuantileEndpoint(arm_A(), prob = 1), "prob")
 })
+
+test_that("quantiles of groups with two endpoints", {
+  # reference value: Python (reference.py)
+  a <- OncoArm(os.median = 15, orr = 0.3, resp.cor = 0.35, endpoints = c("os", "response"))
+  expect_equal(QuantileEndpoint(a, endpoint = "os"), 15, tolerance = 1e-12)
+  expect_equal(QuantileEndpoint(a, endpoint = "os", response = "responders"), 26.61349306,
+               tolerance = 1e-6)
+  expect_error(QuantileEndpoint(a, endpoint = "pfs"), "no PFS")
+})

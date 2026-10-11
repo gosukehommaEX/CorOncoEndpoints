@@ -59,3 +59,10 @@ test_that("invalid inputs give errors", {
   expect_error(ExpectedEvents(arm_A(), n = 100, a.time = c(0, 10), a.rate = 5, time = 5),
                "accrues 50")
 })
+
+test_that("expected OS events of a group with OS and response", {
+  a <- OncoArm(os.median = 15, orr = 0.3, resp.cor = 0.35, endpoints = c("os", "response"))
+  ee <- ExpectedEvents(a, n = 100, endpoint = "os", time = c(6, 15))
+  expect_equal(ee$events, 100 * (1 - exp(-log(2) / 15 * c(6, 15))), tolerance = 1e-5)
+  expect_error(ExpectedEvents(a, n = 100, endpoint = "pfs", time = 6), "no PFS")
+})

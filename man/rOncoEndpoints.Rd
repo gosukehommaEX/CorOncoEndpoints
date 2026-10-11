@@ -128,7 +128,10 @@ The latent times \code{pfs_time} and \code{os_time} always satisfy
 \code{pfs_event}, \code{os_tte} and \code{os_event} account for dropout and
 the censoring of PFS but not for an analysis cutoff, and \code{response} is
 the response of the patient whether or not it would be observed; use
-\code{\link{CutoffData}} for the data observed at an analysis.
+\code{\link{CutoffData}} for the data observed at an analysis. For groups
+with two endpoints (\code{endpoints} in \code{\link{OncoArm}}), the columns
+of the missing endpoint are \code{NA}; all groups must have the same
+endpoints.
 }
 \examples{
 ctl <- OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40,

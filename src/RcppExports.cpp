@@ -11,8 +11,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // generate_arm_cpp
-List generate_arm_cpp(int nsim, int n, double lam_p, double theta, double c_resp, double z_tau, double tau, int os_model, double pi_death, double gam0, double gam1, double lam_o, double c_dec, NumericVector grid_g, double grid_h, int ttr_mode, double ttr_rate, NumericVector a_time, IntegerVector a_counts, NumericVector d_time, NumericVector d_hazard, NumericVector d_cum, double pc_hazard);
-RcppExport SEXP _CorOncoEndpoints_generate_arm_cpp(SEXP nsimSEXP, SEXP nSEXP, SEXP lam_pSEXP, SEXP thetaSEXP, SEXP c_respSEXP, SEXP z_tauSEXP, SEXP tauSEXP, SEXP os_modelSEXP, SEXP pi_deathSEXP, SEXP gam0SEXP, SEXP gam1SEXP, SEXP lam_oSEXP, SEXP c_decSEXP, SEXP grid_gSEXP, SEXP grid_hSEXP, SEXP ttr_modeSEXP, SEXP ttr_rateSEXP, SEXP a_timeSEXP, SEXP a_countsSEXP, SEXP d_timeSEXP, SEXP d_hazardSEXP, SEXP d_cumSEXP, SEXP pc_hazardSEXP) {
+List generate_arm_cpp(int nsim, int n, double lam_p, double theta, double c_resp, double z_tau, double tau, int os_model, double pi_death, double gam0, double gam1, double lam_o, double c_dec, NumericVector grid_g, double grid_h, int ttr_mode, double ttr_rate, NumericVector a_time, IntegerVector a_counts, NumericVector d_time, NumericVector d_hazard, NumericVector d_cum, double pc_hazard, int ep_mode);
+RcppExport SEXP _CorOncoEndpoints_generate_arm_cpp(SEXP nsimSEXP, SEXP nSEXP, SEXP lam_pSEXP, SEXP thetaSEXP, SEXP c_respSEXP, SEXP z_tauSEXP, SEXP tauSEXP, SEXP os_modelSEXP, SEXP pi_deathSEXP, SEXP gam0SEXP, SEXP gam1SEXP, SEXP lam_oSEXP, SEXP c_decSEXP, SEXP grid_gSEXP, SEXP grid_hSEXP, SEXP ttr_modeSEXP, SEXP ttr_rateSEXP, SEXP a_timeSEXP, SEXP a_countsSEXP, SEXP d_timeSEXP, SEXP d_hazardSEXP, SEXP d_cumSEXP, SEXP pc_hazardSEXP, SEXP ep_modeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -39,13 +39,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type d_hazard(d_hazardSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type d_cum(d_cumSEXP);
     Rcpp::traits::input_parameter< double >::type pc_hazard(pc_hazardSEXP);
-    rcpp_result_gen = Rcpp::wrap(generate_arm_cpp(nsim, n, lam_p, theta, c_resp, z_tau, tau, os_model, pi_death, gam0, gam1, lam_o, c_dec, grid_g, grid_h, ttr_mode, ttr_rate, a_time, a_counts, d_time, d_hazard, d_cum, pc_hazard));
+    Rcpp::traits::input_parameter< int >::type ep_mode(ep_modeSEXP);
+    rcpp_result_gen = Rcpp::wrap(generate_arm_cpp(nsim, n, lam_p, theta, c_resp, z_tau, tau, os_model, pi_death, gam0, gam1, lam_o, c_dec, grid_g, grid_h, ttr_mode, ttr_rate, a_time, a_counts, d_time, d_hazard, d_cum, pc_hazard, ep_mode));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_CorOncoEndpoints_generate_arm_cpp", (DL_FUNC) &_CorOncoEndpoints_generate_arm_cpp, 23},
+    {"_CorOncoEndpoints_generate_arm_cpp", (DL_FUNC) &_CorOncoEndpoints_generate_arm_cpp, 24},
     {NULL, NULL, 0}
 };
 

@@ -28,6 +28,10 @@ EventTime <- function(data, events, endpoint = c("os", "pfs")) {
   if (!is.data.frame(data) || !all(c("sim", ev_col, cal_col) %in% names(data))) {
     stop("'data' must be a data frame returned by rOncoEndpoints().", call. = FALSE)
   }
+  if (nrow(data) > 0L && all(is.na(data[[ev_col]]))) {
+    stop("The data have no ", toupper(endpoint), ": the groups were generated ",
+         "without it.", call. = FALSE)
+  }
   ev <- data[[ev_col]] == 1
   sims <- sort(unique(data$sim))
   sp <- split(data[[cal_col]][ev], factor(data$sim[ev], levels = sims))

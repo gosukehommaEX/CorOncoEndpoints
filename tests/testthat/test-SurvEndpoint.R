@@ -66,3 +66,19 @@ test_that("Fleischer et al. (2009) Theorem 5 closed form is used without respons
 test_that("invalid times give errors", {
   expect_error(SurvEndpoint(arm_A(), -1), "non-negative")
 })
+
+test_that("survival functions of groups with two endpoints", {
+  # reference values: Python (reference.py)
+  a <- OncoArm(os.median = 15, orr = 0.3, resp.cor = 0.35, endpoints = c("os", "response"))
+  expect_equal(SurvEndpoint(a, c(6, 15), "os"), exp(-log(2) / 15 * c(6, 15)),
+               tolerance = 1e-12)
+  expect_equal(SurvEndpoint(a, 12, "os", "responders"), 0.7900151525, tolerance = 1e-7)
+  expect_equal(SurvEndpoint(a, 12, "os", "nonresponders"), 0.4819209025, tolerance = 1e-7)
+  expect_error(SurvEndpoint(a, 12, "pfs"), "no PFS")
+  po <- OncoArm(pfs.median = 6, death.prop = 0.15, os.median = 15,
+                endpoints = c("pfs", "os"))
+  expect_equal(SurvEndpoint(po, 15, "os"), 0.5, tolerance = 1e-8)
+  expect_error(SurvEndpoint(po, 12, "os", "responders"), "no response")
+  pr <- OncoArm(pfs.median = 6, orr = 0.3, resp.cor = 0.4, endpoints = c("pfs", "response"))
+  expect_error(SurvEndpoint(pr, 12, "os"), "no OS")
+})

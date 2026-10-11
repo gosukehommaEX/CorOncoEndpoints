@@ -23,8 +23,11 @@ QuantileEndpoint <- function(arm, prob = 0.5, endpoint = c("os", "pfs"),
   if (!is.numeric(prob) || anyNA(prob) || any(!(prob > 0 & prob < 1))) {
     stop("'prob' must be in (0, 1).", call. = FALSE)
   }
+  .check_endpoint_available(arm, endpoint, response)
+  # the exponential time linked to response: PFS, or OS without PFS
+  latent <- if (arm$os.model == "exp") "os" else "pfs"
   vapply(prob, function(pr) {
-    if (endpoint == "pfs" && response == "all") return(-log(1 - pr) / arm$lam_p)
+    if (endpoint == latent && response == "all") return(-log(1 - pr) / arm$lam_p)
     if (endpoint == "os" && response == "all" && arm$os.model == "expexp") {
       return(-log(1 - pr) / arm$lam_o)
     }

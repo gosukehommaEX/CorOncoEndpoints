@@ -12,7 +12,10 @@
 #' function of all patients has the closed form of Fleischer et al. (2009,
 #' Theorem 5); otherwise the contribution of patients who progressed is a
 #' one-dimensional integral over the progression time. For
-#' \code{os.model = "expexp"}, OS of all patients is exponential.
+#' \code{os.model = "expexp"}, OS of all patients is exponential. With
+#' \code{endpoints = c("os", "response")} in \code{\link{OncoArm}}, OS is
+#' exponential and its survival function among responders has the form of that
+#' of PFS.
 #'
 #' @param arm An object of class \code{OncoArm}.
 #' @param t Numeric vector of non-negative times.
@@ -42,7 +45,9 @@ SurvEndpoint <- function(arm, t, endpoint = c("os", "pfs"),
   if (!is.numeric(t) || any(!is.finite(t)) || any(t < 0)) {
     stop("'t' must be a numeric vector of non-negative finite times.", call. = FALSE)
   }
-  if (endpoint == "pfs") {
+  .check_endpoint_available(arm, endpoint, response)
+  # PFS, or OS linked to response without PFS, is exponential
+  if (endpoint == "pfs" || arm$os.model == "exp") {
     return(.surv_pfs(t, arm, response = response, type = type))
   }
   if (type == "hazard") {

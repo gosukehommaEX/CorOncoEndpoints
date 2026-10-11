@@ -48,3 +48,27 @@ test_that("TrialSimulator documented example (h01 = 0.1, h02 = 0.05, h12 = 0.12)
 test_that("non-OncoArm input gives an error", {
   expect_error(CorEndpoints(list()), "OncoArm")
 })
+
+test_that("correlations of groups with two endpoints", {
+  # reference values: Python (reference.py)
+  po_arm <- OncoArm(pfs.median = 6, death.prop = 0.15, os.median = 15,
+                    endpoints = c("pfs", "os"))
+  po <- CorEndpoints(po_arm)
+  expect_equal(po[["cor.pfs.os"]], 0.6088695190, tolerance = 1e-8)
+  expect_true(all(is.na(po[c("cor.pfs.resp", "cor.os.resp", "pcor.os.resp")])))
+  full <- OncoArm(pfs.median = 6, orr = 0.3, resp.cor = 0.4, death.prop = 0.15,
+                  os.median = 15)
+  expect_equal(po[["cor.pfs.os"]], CorEndpoints(full)[["cor.pfs.os"]], tolerance = 1e-10)
+  pr <- CorEndpoints(OncoArm(pfs.median = 6, orr = 0.3, resp.cor = 0.4,
+                             endpoints = c("pfs", "response")))
+  expect_equal(pr[["cor.pfs.resp"]], 0.4, tolerance = 1e-8)
+  expect_true(all(is.na(pr[c("cor.os.resp", "cor.pfs.os", "pcor.os.resp")])))
+  osr <- CorEndpoints(OncoArm(os.median = 15, orr = 0.3, resp.os.median = 24,
+                              endpoints = c("os", "response")))
+  expect_equal(osr[["cor.os.resp"]], 0.2775482985, tolerance = 1e-7)
+  expect_true(all(is.na(osr[c("cor.pfs.resp", "cor.pfs.os", "pcor.os.resp")])))
+  # maximal independence model: Corr(PFS, OS) = median PFS / median OS
+  ee <- CorEndpoints(OncoArm(pfs.median = 6, death.prop = 0.4, os.model = "expexp",
+                             os.median = 15, endpoints = c("pfs", "os")))
+  expect_equal(ee[["cor.pfs.os"]], 0.4, tolerance = 1e-6)
+})

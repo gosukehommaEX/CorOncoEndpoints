@@ -11,7 +11,8 @@
 #' @noRd
 .endpoint_grid <- function(arm, endpoint, tmax, n_grid = 2001L) {
   tt <- seq(0, tmax, length.out = n_grid)
-  if (endpoint == "pfs") {
+  # PFS, or OS linked to response without PFS, is exponential with hazard lam_p
+  if (endpoint == "pfs" || arm$os.model == "exp") {
     S <- exp(-arm$lam_p * tt)
     f <- arm$lam_p * S
   } else {

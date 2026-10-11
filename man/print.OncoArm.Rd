@@ -19,7 +19,8 @@
 \description{
 Prints the calibrated parameters of a treatment group together with the
 implied medians of PFS and OS (overall and by response) and the implied
-Pearson correlations among PFS, OS and response.
+Pearson correlations among PFS, OS and response, for the endpoints that the
+group has.
 }
 \examples{
 OncoArm(pfs.median = 6, orr = 0.3, resp.cor = 0.4, death.prop = 0.15,

@@ -36,3 +36,10 @@ test_that("invalid inputs give errors", {
   expect_error(EventTime(data.frame(sim = 1, os_event = 1, os_calendar_time = 1), 0),
                "positive integer")
 })
+
+test_that("an endpoint that the groups do not have gives an error", {
+  a <- OncoArm(os.median = 15, orr = 0.3, resp.cor = 0.35, endpoints = c("os", "response"))
+  d <- rOncoEndpoints(nsim = 1, n = 50, arms = a, seed = 35)
+  expect_error(EventTime(d, 10, "pfs"), "no PFS")
+  expect_equal(unname(EventTime(d, 10, "os")), sort(d$os_calendar_time)[10])
+})

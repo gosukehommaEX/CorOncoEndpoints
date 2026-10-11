@@ -26,6 +26,11 @@
 #' distributions, and the covariances are computed from the expected
 #' post-progression survival given the progression time, which is tabulated.
 #'
+#' For a group with two endpoints (see \code{\link{OncoArm}}), the correlations
+#' that involve the missing endpoint are \code{NA}; with
+#' \code{endpoints = c("os", "response")}, \code{cor.os.resp} is computed as
+#' \code{Corr(PFS, R)} is for PFS.
+#'
 #' @param arm An object of class \code{OncoArm}.
 #' @return A named numeric vector with elements \code{cor.pfs.resp},
 #'   \code{cor.os.resp}, \code{cor.pfs.os} and \code{pcor.os.resp} (partial
@@ -42,9 +47,20 @@
 #' @export
 CorEndpoints <- function(arm) {
   if (!inherits(arm, "OncoArm")) stop("'arm' must be an OncoArm object.", call. = FALSE)
-  p <- arm$orr
+  ep <- .arm_endpoints(arm)
+  na <- NA_real_
+  if (!all(c("pfs", "os") %in% ep)) {
+    # two endpoints with response: the exponential time (PFS or OS) and response
+    rho <- .cor_pfs_resp(arm$theta, arm$orr, arm$z_tau)$cor
+    if ("pfs" %in% ep) {
+      return(c(cor.pfs.resp = rho, cor.os.resp = na, cor.pfs.os = na, pcor.os.resp = na))
+    }
+    return(c(cor.pfs.resp = na, cor.os.resp = rho, cor.pfs.os = na, pcor.os.resp = na))
+  }
+  has_resp <- "response" %in% ep
+  p <- if (has_resp) arm$orr else 0
   lam_p <- arm$lam_p
-  rho_pr <- .cor_pfs_resp(arm$theta, p, arm$z_tau)$cor
+  rho_pr <- if (has_resp) .cor_pfs_resp(arm$theta, p, arm$z_tau)$cor else 0
   cov_pr <- rho_pr * sqrt(p * (1 - p)) / lam_p
   var_p <- 1 / lam_p ^ 2
   if (arm$os.model == "idm") {
@@ -79,8 +95,12 @@ CorEndpoints <- function(arm) {
     e_pdd <- int(function(s) s * fp(s) * gfun(s))
     e_dd <- int(function(s) fp(s) * gfun(s))
     cov_po <- var_p + e_pdd - e_dd / lam_p
-    cov_or <- cov_pr + int(function(s) gfun(s) * (qs(s) - p) * fp(s))
+    cov_or <- if (has_resp) cov_pr + int(function(s) gfun(s) * (qs(s) - p) * fp(s)) else 0
     var_o <- 1 / arm$lam_o ^ 2
+  }
+  if (!has_resp) {
+    return(c(cor.pfs.resp = na, cor.os.resp = na,
+             cor.pfs.os = cov_po / sqrt(var_p * var_o), pcor.os.resp = na))
   }
   var_r <- p * (1 - p)
   r_or <- cov_or / sqrt(var_o * var_r)

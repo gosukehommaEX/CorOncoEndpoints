@@ -205,3 +205,37 @@ test_that("invalid inputs give errors", {
   expect_error(rOncoEndpoints(n = 10, arms = a, d.hazard = -1), "d.hazard")
   expect_error(rOncoEndpoints(n = 10, arms = a, a.rate = 1), "a.time")
 })
+
+test_that("groups with two endpoints share the random numbers of three endpoints", {
+  full <- OncoArm(pfs.median = 6, orr = 0.3, resp.cor = 0.4, death.prop = 0.15,
+                  os.median = 15)
+  d3 <- rOncoEndpoints(nsim = 2, n = 50, arms = full, a.time = c(0, 12), seed = 31)
+  po <- OncoArm(pfs.median = 6, death.prop = 0.15, os.median = 15,
+                endpoints = c("pfs", "os"))
+  d_po <- rOncoEndpoints(nsim = 2, n = 50, arms = po, a.time = c(0, 12), seed = 31)
+  cols <- c("pfs_time", "os_time", "progression")
+  expect_identical(d_po[cols], d3[cols])
+  expect_true(all(is.na(d_po$response)) && all(is.na(d_po$ttr)))
+  pr <- OncoArm(pfs.median = 6, orr = 0.3, resp.cor = 0.4, endpoints = c("pfs", "response"))
+  d_pr <- rOncoEndpoints(nsim = 2, n = 50, arms = pr, a.time = c(0, 12), seed = 31)
+  cols <- c("pfs_time", "response", "pfs_tte")
+  expect_identical(d_pr[cols], d3[cols])
+  expect_true(all(is.na(d_pr$os_time)) && all(is.na(d_pr$os_event)) &&
+                all(is.na(d_pr$progression)))
+})
+
+test_that("OS and response: OS is exponential and linked to response", {
+  a <- OncoArm(os.median = 15, orr = 0.3, resp.cor = 0.35, resp.timing = "ttr",
+               resp.tau = 1.5, ttr.median = 3, endpoints = c("os", "response"))
+  d <- rOncoEndpoints(nsim = 1, n = 200000, arms = a, seed = 32)
+  expect_true(all(is.na(d$pfs_time)) && all(is.na(d$progression)))
+  r <- d$response == 1
+  expect_true(all(d$os_time[r] > 1.5) && all(d$ttr[r] < d$os_time[r]))
+  expect_lt(abs(mean(d$response) - 0.3), 0.005)
+  expect_lt(abs(mean(d$os_time > 15) - 0.5), 0.005)
+  expect_lt(abs(cor(d$os_time, d$response) - 0.35), 0.01)
+  expect_error(rOncoEndpoints(n = 10, arms = a, pfs.cens.hazard = 0.1), "requires PFS")
+  other <- OncoArm(pfs.median = 6, orr = 0.3, resp.cor = 0.4,
+                   endpoints = c("pfs", "response"))
+  expect_error(rOncoEndpoints(n = c(10, 10), arms = list(a, other)), "same 'endpoints'")
+})

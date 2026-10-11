@@ -88,3 +88,18 @@ test_that("invalid inputs give errors", {
   expect_error(CutoffData(make_toy(), cutoff = c(1, 2, 3)), "one value per")
   expect_error(CutoffData(data.frame(a = 1), cutoff = 1), "rOncoEndpoints")
 })
+
+test_that("columns of a missing endpoint stay NA", {
+  a <- OncoArm(os.median = 15, orr = 0.3, resp.cor = 0.35, resp.timing = "ttr",
+               resp.tau = 1.5, ttr.median = 3, endpoints = c("os", "response"))
+  out <- CutoffData(rOncoEndpoints(nsim = 1, n = 200, arms = a, a.time = c(0, 12),
+                                   seed = 33), cutoff = 18)
+  expect_true(all(is.na(out$pfs_tte)) && all(is.na(out$pfs_event)))
+  expect_false(anyNA(out$os_event))
+  expect_false(anyNA(out$response_obs))
+  po <- OncoArm(pfs.median = 6, death.prop = 0.15, os.median = 15,
+                endpoints = c("pfs", "os"))
+  out2 <- CutoffData(rOncoEndpoints(nsim = 1, n = 50, arms = po, seed = 34), cutoff = 10)
+  expect_true(all(is.na(out2$response_obs)))
+  expect_false(anyNA(out2$pfs_event))
+})

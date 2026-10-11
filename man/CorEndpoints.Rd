@@ -39,6 +39,11 @@ score of PFS.
 For \code{os.model = "expexp"}, the variances are those of the exponential
 distributions, and the covariances are computed from the expected
 post-progression survival given the progression time, which is tabulated.
+
+For a group with two endpoints (see \code{\link{OncoArm}}), the correlations
+that involve the missing endpoint are \code{NA}; with
+\code{endpoints = c("os", "response")}, \code{cor.os.resp} is computed as
+\code{Corr(PFS, R)} is for PFS.
 }
 \examples{
 arm <- OncoArm(pfs.median = 6, orr = 0.3, resp.cor = 0.4, death.prop = 0.15,

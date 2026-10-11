@@ -22,6 +22,7 @@
   if (!is.numeric(n) || length(n) != k || any(n <= 0)) {
     stop("'n' must be a vector of positive sample sizes, one per group.", call. = FALSE)
   }
+  for (a in arms) .check_endpoint_available(a, endpoint)
   acc <- .accrual_setup(a.time, a.rate, a.prop, sum(n))
   drop <- .dropout_setup(d.hazard, d.median, d.time, k)
   pc <- .group_rates(pfs.cens.hazard, k, "pfs.cens.hazard")

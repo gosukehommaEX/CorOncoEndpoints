@@ -35,6 +35,10 @@ using namespace Rcpp;
 //'   the pieces of the dropout distribution (one piece for exponential
 //'   dropout; a zero hazard for no dropout).
 //' @param pc_hazard Hazard of the censoring of PFS (0 for none).
+//' @param ep_mode Endpoints of the group: 0 for all three, 1 for PFS and OS
+//'   (response is \code{NA}), 2 for PFS and response (OS is \code{NA}), 3 for
+//'   OS and response (the exponential time linked to response is OS, and PFS
+//'   is \code{NA}). The random numbers drawn do not depend on \code{ep_mode}.
 //' @return A list of vectors.
 //' @keywords internal
 // [[Rcpp::export]]
@@ -44,7 +48,7 @@ List generate_arm_cpp(int nsim, int n, double lam_p, double theta, double c_resp
                       NumericVector grid_g, double grid_h, int ttr_mode,
                       double ttr_rate, NumericVector a_time, IntegerVector a_counts,
                       NumericVector d_time, NumericVector d_hazard,
-                      NumericVector d_cum, double pc_hazard) {
+                      NumericVector d_cum, double pc_hazard, int ep_mode) {
   const int N = nsim * n;
   NumericVector z1 = dqrng::dqrnorm(N, 0.0, 1.0);
   NumericVector w = dqrng::dqrnorm(N, 0.0, 1.0);
@@ -98,6 +102,17 @@ List generate_arm_cpp(int nsim, int n, double lam_p, double theta, double c_resp
     int v_prog, v_resp;
     coronco::transform_one(z1[i], w[i], u_type[i], e_pps[i], u_ttr[i], par,
                            v_pfs, v_os, v_prog, v_resp, v_ttr);
+    if (ep_mode == 1) {
+      v_resp = NA_INTEGER;
+      v_ttr = NA_REAL;
+    } else if (ep_mode == 2) {
+      v_os = NA_REAL;
+      v_prog = NA_INTEGER;
+    } else if (ep_mode == 3) {
+      v_os = v_pfs;
+      v_pfs = NA_REAL;
+      v_prog = NA_INTEGER;
+    }
     sim[i] = i / n + 1;
     pfs[i] = v_pfs;
     os[i] = v_os;

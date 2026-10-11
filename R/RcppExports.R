@@ -29,9 +29,13 @@
 #'   the pieces of the dropout distribution (one piece for exponential
 #'   dropout; a zero hazard for no dropout).
 #' @param pc_hazard Hazard of the censoring of PFS (0 for none).
+#' @param ep_mode Endpoints of the group: 0 for all three, 1 for PFS and OS
+#'   (response is \code{NA}), 2 for PFS and response (OS is \code{NA}), 3 for
+#'   OS and response (the exponential time linked to response is OS, and PFS
+#'   is \code{NA}). The random numbers drawn do not depend on \code{ep_mode}.
 #' @return A list of vectors.
 #' @keywords internal
-generate_arm_cpp <- function(nsim, n, lam_p, theta, c_resp, z_tau, tau, os_model, pi_death, gam0, gam1, lam_o, c_dec, grid_g, grid_h, ttr_mode, ttr_rate, a_time, a_counts, d_time, d_hazard, d_cum, pc_hazard) {
-    .Call(`_CorOncoEndpoints_generate_arm_cpp`, nsim, n, lam_p, theta, c_resp, z_tau, tau, os_model, pi_death, gam0, gam1, lam_o, c_dec, grid_g, grid_h, ttr_mode, ttr_rate, a_time, a_counts, d_time, d_hazard, d_cum, pc_hazard)
+generate_arm_cpp <- function(nsim, n, lam_p, theta, c_resp, z_tau, tau, os_model, pi_death, gam0, gam1, lam_o, c_dec, grid_g, grid_h, ttr_mode, ttr_rate, a_time, a_counts, d_time, d_hazard, d_cum, pc_hazard, ep_mode) {
+    .Call(`_CorOncoEndpoints_generate_arm_cpp`, nsim, n, lam_p, theta, c_resp, z_tau, tau, os_model, pi_death, gam0, gam1, lam_o, c_dec, grid_g, grid_h, ttr_mode, ttr_rate, a_time, a_counts, d_time, d_hazard, d_cum, pc_hazard, ep_mode)
 }
 

@@ -27,7 +27,8 @@ generate_arm_cpp(
   d_time,
   d_hazard,
   d_cum,
-  pc_hazard
+  pc_hazard,
+  ep_mode
 )
 }
 \arguments{
@@ -58,6 +59,11 @@ the pieces of the dropout distribution (one piece for exponential
 dropout; a zero hazard for no dropout).}
 
 \item{pc_hazard}{Hazard of the censoring of PFS (0 for none).}
+
+\item{ep_mode}{Endpoints of the group: 0 for all three, 1 for PFS and OS
+(response is \code{NA}), 2 for PFS and response (OS is \code{NA}), 3 for
+OS and response (the exponential time linked to response is OS, and PFS
+is \code{NA}). The random numbers drawn do not depend on \code{ep_mode}.}
 }
 \value{
 A list of vectors.

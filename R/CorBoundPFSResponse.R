@@ -13,7 +13,10 @@
 #' unchanged, and the lower bound is attained when the responders are the
 #' patients with the shortest PFS above \code{resp.tau}. The Gaussian copula
 #' used by \code{\link{OncoArm}} approaches both bounds as the copula
-#' correlation tends to -1 or 1; \code{OncoArm()} restricts the copula
+#' correlation tends to -1 or 1. The bounds hold for any exponential time and a
+#' binary response, for example OS in a group with
+#' \code{endpoints = c("os", "response")}, whose median is then given in
+#' \code{pfs.median}; \code{OncoArm()} restricts the copula
 #' correlation to (-0.9999, 0.9999), so correlations very close to a bound
 #' may not be attainable.
 #'
