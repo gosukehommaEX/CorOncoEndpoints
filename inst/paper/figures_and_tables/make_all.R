@@ -10,8 +10,8 @@ scripts <- c("figure1_expexp_hazards.R", "figure2_os_distribution.R",
              "figure3_correlations.R", "figure4_two_in_one_type1.R",
              "table1_calibration.R", "table2_required_events.R", "table3_win_statistics.R",
              "tableS1_inputs.R", "tableS2_reproduction.R", "tableS3_generator_validation.R",
-             "tableS4_function_validation.R", "tableS5_computing_time.R",
-             "tableS6_two_in_one.R", "tableS7_win_statistics.R",
+             "tableS4_function_validation.R", "tableS5_two_in_one.R",
+             "tableS6_win_statistics.R",
              "figureS1_survival_by_response.R", "figureS2_death_proportion.R",
              "figureS3_two_in_one_alternative.R", "figureS4_two_in_one_g1.R")
 for (s in scripts) {

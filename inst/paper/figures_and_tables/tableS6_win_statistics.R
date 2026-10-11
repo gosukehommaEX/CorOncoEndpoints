@@ -1,9 +1,9 @@
-# Table S7: win statistics of all scenarios, including the type I error rates
+# Table S6: win statistics of all scenarios, including the type I error rates
 # under the global null and the contribution of each endpoint
 #
 # Reads inst/paper/data/win_statistics_simulation.rds. Writes
-# inst/paper/output/tables/tableS7_win_statistics.tex and
-# inst/paper/output/numbers/tableS7_win_statistics.csv.
+# inst/paper/output/tables/tableS6_win_statistics.tex and
+# inst/paper/output/numbers/tableS6_win_statistics.csv.
 
 source(file.path("inst", "paper", "figures_and_tables", "settings.R"))
 src <- "win_statistics_simulation.rds"
@@ -41,7 +41,7 @@ header <- c(paste0("Hypothesis & $\\kappa$ & $\\mathrm{Corr}$ & \\multicolumn{3}
             paste0(paste(c(rep("", 10), "emp. SD", "formula", "indep.", "OS", "PFS", ""),
                          collapse = " & "),
                    " \\\\"))
-write_table_tex("tableS7_win_statistics",
+write_table_tex("tableS6_win_statistics",
                 caption = paste0("Win statistics of prioritized OS, PFS and response: mean ",
                                  "proportions of pairs won and lost on each endpoint in the ",
                                  "hierarchy and when the endpoint is compared alone, ties, and ",
@@ -68,7 +68,7 @@ write_table_tex("tableS7_win_statistics",
                 size = "\\scriptsize\\setlength{\\tabcolsep}{2pt}")
 vars <- setdiff(names(sm), c("resp_cor", "kappa", "hypothesis"))
 lab <- paste0(sm$hypothesis, "_cor", sm$resp_cor, "_kappa", sm$kappa)
-write_numbers("tableS7_win_statistics",
+write_numbers("tableS6_win_statistics",
               key = as.vector(outer(vars, lab, paste, sep = "_")),
               value = as.vector(t(as.matrix(sm[, vars]))),
               description = as.vector(outer(vars, lab, paste, sep = ", ")),

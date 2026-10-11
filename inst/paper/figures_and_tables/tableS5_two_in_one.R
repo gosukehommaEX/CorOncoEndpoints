@@ -1,9 +1,9 @@
-# Table S6: operating characteristics of the 2-in-1 design at the expansion
+# Table S5: operating characteristics of the 2-in-1 design at the expansion
 # cutpoint 1.645 under the two decision rules
 #
 # Reads inst/paper/data/two_in_one_simulation.rds. Writes
-# inst/paper/output/tables/tableS6_two_in_one.tex and
-# inst/paper/output/numbers/tableS6_two_in_one.csv.
+# inst/paper/output/tables/tableS5_two_in_one.tex and
+# inst/paper/output/numbers/tableS5_two_in_one.csv.
 
 source(file.path("inst", "paper", "figures_and_tables", "settings.R"))
 src <- "two_in_one_simulation.rds"
@@ -46,7 +46,7 @@ header <- c(paste0("Scenario & $\\kappa$ & $\\mathrm{Corr}$ & $\\mathrm{Corr}$ &
             "\\cmidrule(lr){13-14}",
             paste0(" & & $(\\mathrm{PFS}, R)$ & $(\\mathrm{OS}, R)$ & & $(X, Z_{\\mathrm{PFS}})$ & ",
                    "$(X, Y_{\\mathrm{OS}})$ & & alone & alone & & & Chen & G1 \\\\"))
-write_table_tex("tableS6_two_in_one",
+write_table_tex("tableS5_two_in_one",
                 caption = paste0("Operating characteristics of the 2-in-1 design with expansion ",
                                  "when $X \\ge 1.645$."),
                 label = "tab:twoinone", align = "lrrrrrrrrrrrrr", header = header, body = body,
@@ -70,7 +70,7 @@ write_table_tex("tableS6_two_in_one",
                 size = "\\footnotesize\\setlength{\\tabcolsep}{3pt}")
 vars <- setdiff(names(sm), c("scenario", "type", "resp_cor", "kappa"))
 lab <- paste0(sm$type, "_cor", sm$resp_cor, "_kappa", sm$kappa)
-write_numbers("tableS6_two_in_one",
+write_numbers("tableS5_two_in_one",
               key = as.vector(outer(vars, lab, paste, sep = "_")),
               value = as.vector(t(as.matrix(sm[, vars]))),
               description = as.vector(outer(vars, lab, paste, sep = ", ")),

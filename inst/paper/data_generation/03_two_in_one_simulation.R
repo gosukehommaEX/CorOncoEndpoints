@@ -1,4 +1,4 @@
-# Simulation of the 2-in-1 adaptive phase 2/3 design (Figure 4, Table S6,
+# Simulation of the 2-in-1 adaptive phase 2/3 design (Figure 4, Table S5,
 # Figures S3 and S4)
 #
 # Run from the package root:

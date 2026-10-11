@@ -1,5 +1,5 @@
 # Simulation of the win ratio and win odds of prioritized OS, PFS and response
-# (Table 3 and Table S7)
+# (Table 3 and Table S6)
 #
 # Run from the package root:
 #   source("inst/paper/data_generation/04_win_statistics_simulation.R")

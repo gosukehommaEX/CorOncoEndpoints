@@ -40,11 +40,6 @@ source("inst/paper/data_generation/01_model_quantities.R")
 source("inst/paper/data_generation/02_design_simulation.R")
 source("inst/paper/data_generation/03_two_in_one_simulation.R")
 source("inst/paper/data_generation/04_win_statistics_simulation.R")
-# restart R before measuring the computing time (Table S5): objects left by the
-# earlier scripts can slow down the memory management of R. Measure on mains
-# power with the R window in the foreground and file synchronization paused.
-devtools::load_all()
-source("inst/paper/data_generation/05_computing_time.R")
 source("inst/reproduce/reproduce_published.R")
 source("inst/validation/validate_generator.R")
 source("inst/paper/figures_and_tables/make_all.R")
@@ -69,9 +64,8 @@ scripts.
 | Table S2 | `tableS2_reproduction.R` | `inst/reproduce/output/reproduce_results.csv` |
 | Table S3a-c | `tableS3_generator_validation.R` | `inst/validation/output/validate_generator.csv` |
 | Table S4 | `tableS4_function_validation.R` | `validation/output/validate_example_functions.csv` |
-| Table S5 | `tableS5_computing_time.R` | `computing_time.rds` |
-| Table S6 | `tableS6_two_in_one.R` | `two_in_one_simulation.rds` |
-| Table S7 | `tableS7_win_statistics.R` | `win_statistics_simulation.rds` |
+| Table S5 | `tableS5_two_in_one.R` | `two_in_one_simulation.rds` |
+| Table S6 | `tableS6_win_statistics.R` | `win_statistics_simulation.rds` |
 | Figure S1 | `figureS1_survival_by_response.R` | `model_quantities.rds` |
 | Figure S2 | `figureS2_death_proportion.R` | `model_quantities.rds` |
 | Figure S3 | `figureS3_two_in_one_alternative.R` | `two_in_one_simulation.rds` |
