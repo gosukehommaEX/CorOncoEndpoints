@@ -1,0 +1,188 @@
+---
+title: "Accrual, dropout and the choice of endpoints"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Accrual, dropout and the choice of endpoints}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r setup}
+library(CorOncoEndpoints)
+ctl <- OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40, death.prop = 0.15,
+               os.median = 15, pps.hr.resp = 0.6)
+trt <- OncoArm(pfs.median = 6 / 0.7, orr = 0.45, resp.cor = 0.40,
+               death.prop = 0.15, pps.hazard = ctl$gam0, pps.hr.resp = 0.6)
+arms <- list(Control = ctl, Treatment = trt)
+```
+
+This vignette shows how the settings of a trial are specified: accrual,
+dropout and the censoring of PFS, the observation of response, groups with two
+of the three endpoints, and random-number streams for simulations run in
+batches. Time is in months throughout.
+
+## Accrual
+
+Accrual is specified as in the FastSurvival package. `a.time` gives the
+breakpoints of the accrual intervals, and the number of patients in each
+interval is given by rates in patients per month (`a.rate`) or by proportions
+(`a.prop`). The rates refer to all groups together. The number of patients of
+each group in each interval is fixed, and the patients are placed uniformly
+within their interval.
+
+With one more rate than intervals, the last rate applies to an open final
+interval that ends when all patients are enrolled. Below, 10 patients per month
+are enrolled for 6 months and then 30 per month until the 300 patients are
+enrolled.
+
+```{r}
+d1 <- rOncoEndpoints(nsim = 1, n = c(150, 150), arms = arms,
+                     a.time = c(0, 6), a.rate = c(10, 30), seed = 1)
+table(interval = cut(d1$accrual_time, c(0, 6, Inf), right = FALSE), d1$group)
+max(d1$accrual_time)
+```
+
+The first 6 months enroll `r 10 * 6` patients, `r 10 * 6 / 2` per group, and
+accrual ends at month `r 6 + (300 - 10 * 6) / 30`. With as many rates as
+intervals, the rates must accrue the total sample size; otherwise an error
+suggests the alternatives. Proportions describe the same pattern without
+rates:
+
+```{r}
+d2 <- rOncoEndpoints(nsim = 1, n = c(150, 150), arms = arms,
+                     a.time = c(0, 6, 14), a.prop = c(0.2, 0.8), seed = 2)
+table(interval = cut(d2$accrual_time, c(0, 6, 14), right = FALSE), d2$group)
+```
+
+Accrual may start after time 0, for example for the patients of the expansion
+of a trial. Here 20 patients per month are enrolled from month 12:
+
+```{r}
+d3 <- rOncoEndpoints(nsim = 1, n = c(50, 50), arms = arms, a.time = 12,
+                     a.rate = 20, seed = 3)
+range(d3$accrual_time)
+```
+
+`ExpectedEvents()`, `AverageHR()` and `RequiredEvents()` take the same
+arguments:
+
+```{r}
+ExpectedEvents(arms, n = c(150, 150), a.time = c(0, 6), a.rate = c(10, 30),
+               endpoint = "os", time = c(12, 24, 36))
+```
+
+## Dropout and censoring of PFS
+
+Dropout is exponential with hazard `d.hazard` (or median `d.median`) and
+censors PFS and OS. A proportion `q` lost to follow-up within a year
+corresponds to the hazard `-log(1 - q) / 12` per month. Piecewise exponential
+dropout is given by hazards in `d.hazard` and breakpoints in `d.time`.
+
+`pfs.cens.hazard` adds a censoring time that applies to PFS only, for example
+the start of another anticancer therapy before progression, after which OS is
+still followed. Both censoring mechanisms are independent of the endpoints.
+
+```{r}
+q <- 0.05
+d4 <- rOncoEndpoints(nsim = 1, n = c(2000, 2000), arms = arms, a.time = c(0, 12),
+                     d.hazard = -log(1 - q) / 12, pfs.cens.hazard = 0.02, seed = 4)
+c(dropout_within_a_year = mean(d4$dropout_time <= 12),
+  pfs_censored_by_therapy = mean(d4$pfs_cens_time < pmin(d4$pfs_time, d4$dropout_time)),
+  os_events = mean(d4$os_event))
+d5 <- rOncoEndpoints(nsim = 1, n = c(2000, 2000), arms = arms, a.time = c(0, 12),
+                     d.hazard = c(0.02, 0.005), d.time = c(0, 12, Inf), seed = 5)
+c(dropout_before_12 = mean(d5$dropout_time <= 12), expected = 1 - exp(-0.02 * 12))
+```
+
+## Observation of response
+
+The column `response` of the generated data is the response of the patient,
+whether or not it would be observed. `CutoffData()` decides which responses
+are observed at an analysis. With `resp.timing = "landmark"`, the response is
+determined at the first tumor assessment `resp.tau`, and it is observed only
+if the patient is still followed then; with `resp.timing = "ttr"` the time to
+response plays this role. In `response_obs`, a patient without an observed
+response counts as a non-responder, as in an intention-to-treat analysis, and
+`response_eval` indicates the patients who were followed up to the first
+assessment, for an analysis restricted to them.
+
+```{r}
+lm_arm <- OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40, death.prop = 0.15,
+                  os.median = 15, resp.timing = "landmark", resp.tau = 1.5)
+d6 <- rOncoEndpoints(nsim = 1, n = 20000, arms = lm_arm, a.time = c(0, 12),
+                     d.hazard = 0.05, seed = 6)
+c6 <- CutoffData(d6, cutoff = 24)
+c(response = mean(c6$response), observed_itt = mean(c6$response_obs),
+  observed_among_assessed = mean(c6$response_obs[c6$response_eval == 1]))
+```
+
+Because dropout is independent of response, the proportion among the patients
+who were assessed estimates the response rate of `r lm_arm$orr`, whereas the
+intention-to-treat proportion is expected to be
+`r lm_arm$orr` times the probability of being followed up to month
+`r lm_arm$tau`, that is, `r round(lm_arm$orr * exp(-0.05 * lm_arm$tau), 3)`. The
+input `orr` is therefore the response rate without dropout.
+
+## Two of the three endpoints
+
+A group can be described by two endpoints through `endpoints` in `OncoArm()`;
+the columns of the third endpoint are then `NA`. With PFS and OS only, the
+response inputs are not needed:
+
+```{r}
+po <- OncoArm(pfs.median = 6, death.prop = 0.15, os.median = 15,
+              endpoints = c("pfs", "os"))
+CorEndpoints(po)
+```
+
+With OS and response only, OS is exponential and is linked to response
+directly, so that `resp.cor` is the correlation between OS and response:
+
+```{r}
+osr <- OncoArm(os.median = 15, orr = 0.30, resp.cor = 0.35,
+               endpoints = c("os", "response"))
+CorEndpoints(osr)
+head(rOncoEndpoints(nsim = 1, n = 5, arms = osr, seed = 7)[
+  , c("pfs_time", "os_time", "response")])
+```
+
+Alternatively, the three endpoints can be generated and PFS ignored. The
+correlation between OS and response is then a result of the other inputs, here
+`r round(CorEndpoints(ctl)[["cor.os.resp"]], 3)` for the control group, and OS
+is not exponential.
+
+## Correlation between PFS and OS as input
+
+The proportion of PFS events that are deaths can be replaced by a target
+correlation between PFS and OS:
+
+```{r}
+pc <- OncoArm(pfs.median = 6, orr = 0.30, resp.cor = 0.40, pfs.os.cor = 0.55,
+              os.median = 15)
+c(death.prop = pc$death.prop, CorEndpoints(pc)["cor.pfs.os"])
+```
+
+The attainable correlations are limited by the medians: with medians of 6 and
+15 months, values above about
+`r round(CorEndpoints(OncoArm(pfs.median = 6, death.prop = 1e-4, os.median = 15, endpoints = c("pfs", "os")))[["cor.pfs.os"]], 2)`
+cannot be reached, and `OncoArm()` then reports the attainable range.
+
+## Simulations in batches
+
+A large simulation can be run in batches with the same `seed` and different
+values of `stream`. Each stream is an independent sequence of random numbers,
+so a batch gives the same data whether the batches are run one after another
+or in parallel.
+
+```{r}
+batch <- function(b) {
+  rOncoEndpoints(nsim = 10, n = c(150, 150), arms = arms, a.time = c(0, 12),
+                 seed = 2026, stream = b)
+}
+identical(batch(1), batch(1))
+identical(batch(1)$pfs_time, batch(2)$pfs_time)
+```

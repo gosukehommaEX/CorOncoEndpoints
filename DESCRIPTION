@@ -2,7 +2,7 @@ Package: CorOncoEndpoints
 Type: Package
 Title: Correlated Progression-Free Survival, Overall Survival and Objective
     Response for Oncology Trial Simulation
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
                   role = c("aut", "cre"),
@@ -20,8 +20,12 @@ Description: Generates correlated progression-free survival (PFS), overall
     association between PFS and response, and further functions compute the
     implied correlations, survival functions, expected numbers of events,
     average hazard ratios and the number of events required by the log-rank
-    test. Random numbers are generated with 'dqrng' and transformed in 'C++'
-    via 'Rcpp'.
+    test. A group can also be described by two of the three endpoints, and the
+    correlation between PFS and OS can be given instead of the proportion of
+    PFS events that are deaths. Trials are simulated with piecewise accrual
+    given by rates or proportions, exponential or piecewise exponential
+    dropout and censoring of PFS alone. Random numbers are generated with
+    'dqrng' and transformed in 'C++' via 'Rcpp'.
 License: MIT + file LICENSE
 URL: https://github.com/gosukehommaEX/CorOncoEndpoints,
     https://gosukehommaEX.github.io/CorOncoEndpoints/

@@ -1,3 +1,65 @@
+# CorOncoEndpoints 0.3.0
+
+## Breaking changes
+
+* `a.rate` is now an absolute accrual rate (patients per unit time over all
+  groups), as in the FastSurvival package. With `length(a.time) - 1` rates
+  they must accrue the total sample size; with `length(a.time)` rates the last
+  one applies to an open final interval. The relative intensities of version
+  0.2.0 are given by the new `a.prop`.
+* Each accrual interval now receives a fixed number of patients of each group
+  (largest-remainder rounding), placed uniformly within the interval, instead
+  of independently drawn entry times. With one accrual interval, or none, the
+  data are the same as in version 0.2.0.
+* `CutoffData()` now counts a response with `resp.timing = "landmark"` as
+  observed only if the landmark `resp.tau` was reached before the cutoff and
+  before dropout. Responses with `resp.timing = "none"` and `"ttr"` are
+  treated as before, unless the new censoring of PFS applies.
+* In `ExpectedEvents()`, `AverageHR()` and `RequiredEvents()`, the new
+  arguments follow `a.rate`, so the arguments after `a.rate` must be named.
+* `orr` and `death.prop` of `OncoArm()` have the default `NULL`, because they
+  are not needed for every combination of endpoints.
+
+## New features
+
+* `OncoArm(endpoints = )` describes a group by two of the three endpoints:
+  PFS and OS, PFS and response, or OS and response. With OS and response, OS
+  is exactly exponential and is linked to response by the Gaussian copula, so
+  that `resp.cor` is the correlation between OS and response and
+  `resp.os.median` the median OS of responders. The columns of the missing
+  endpoint are `NA`.
+* `OncoArm(pfs.os.cor = )` gives the correlation between PFS and OS instead of
+  `death.prop`, which is then found by a one-dimensional search.
+* Accrual may start after time 0 (`a.time[1] > 0`).
+* Dropout can be given by its median (`d.median`) and can be piecewise
+  exponential (`d.time`, with group-specific hazards through lists).
+* `pfs.cens.hazard` censors PFS (and the assessment of response) but not OS,
+  for example at the start of another anticancer therapy.
+* `CutoffData()` returns `response_eval`, whether the patient was followed up
+  to the first tumor assessment.
+* `rOncoEndpoints(stream = )` selects an independent random-number stream for
+  simulations in batches.
+* `rOncoEndpoints()` returns the columns `pfs_cens_time` and `resp_tau`.
+* The design functions take the same accrual and dropout arguments as
+  `rOncoEndpoints()` and `pfs.cens.hazard` for PFS.
+
+## Documentation
+
+* New vignettes: "Accrual, dropout and the choice of endpoints",
+  "2-in-1 adaptive design" and "Win ratio and win odds of prioritized
+  endpoints".
+* The help of `rOncoEndpoints()` no longer states that dropout censors the
+  observation of response for every timing of response; `CutoffData()`
+  documents when a response counts as observed.
+
+## Verification
+
+* `tests/testthat/fixtures/reference_v0.2.0.rds` stores outputs of version
+  0.2.0, and the tests check that the same calls give the same results.
+* New tests with expected values computed independently in Python
+  (`inst/validation/python`), and `inst/validation/validate_options.R`, a
+  Monte Carlo check of the new options.
+
 # CorOncoEndpoints 0.2.0
 
 ## Breaking changes

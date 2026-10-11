@@ -33,6 +33,12 @@ navbar:
         href: articles/theory.html
       - text: Number of events for PFS and OS
         href: articles/design.html
+      - text: Accrual, dropout and the choice of endpoints
+        href: articles/trial-settings.html
+      - text: 2-in-1 adaptive design
+        href: articles/two-in-one.html
+      - text: Win ratio and win odds of prioritized endpoints
+        href: articles/win-ratio.html
     news:
       text: Changelog
       href: news/index.html
@@ -80,6 +86,12 @@ articles:
   contents:
   - theory
   - design
+- title: Trial settings and examples
+  navbar: ~
+  contents:
+  - trial-settings
+  - two-in-one
+  - win-ratio
 
 footer:
   structure:
