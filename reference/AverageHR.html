@@ -58,7 +58,11 @@ analysis at given calendar times.</p>
 <span>  <span class="va">n</span>,</span>
 <span>  a.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  a.rate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  a.prop <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  d.hazard <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  d.median <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  d.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pfs.cens.hazard <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  endpoint <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"os"</span>, <span class="st">"pfs"</span><span class="op">)</span>,</span>
 <span>  <span class="va">time</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -76,12 +80,17 @@ analysis at given calendar times.</p>
 <dd><p>Sample sizes of the two groups.</p></dd>
 
 
-<dt id="arg-a-time-a-rate">a.time, a.rate<a class="anchor" aria-label="anchor" href="#arg-a-time-a-rate"></a></dt>
+<dt id="arg-a-time-a-rate-a-prop">a.time, a.rate, a.prop<a class="anchor" aria-label="anchor" href="#arg-a-time-a-rate-a-prop"></a></dt>
 <dd><p>Accrual as in <code><a href="rOncoEndpoints.html">rOncoEndpoints</a></code>.</p></dd>
 
 
-<dt id="arg-d-hazard">d.hazard<a class="anchor" aria-label="anchor" href="#arg-d-hazard"></a></dt>
-<dd><p>Dropout hazard, a scalar or one value per group.</p></dd>
+<dt id="arg-d-hazard-d-median-d-time">d.hazard, d.median, d.time<a class="anchor" aria-label="anchor" href="#arg-d-hazard-d-median-d-time"></a></dt>
+<dd><p>Dropout as in <code><a href="rOncoEndpoints.html">rOncoEndpoints</a></code>.</p></dd>
+
+
+<dt id="arg-pfs-cens-hazard">pfs.cens.hazard<a class="anchor" aria-label="anchor" href="#arg-pfs-cens-hazard"></a></dt>
+<dd><p>Hazard of the censoring of PFS, a scalar or one
+value per group (used for <code>endpoint = "pfs"</code> only).</p></dd>
 
 
 <dt id="arg-endpoint">endpoint<a class="anchor" aria-label="anchor" href="#arg-endpoint"></a></dt>

@@ -2,7 +2,8 @@
 
 Returns, for each simulated trial, the calendar time at which the given
 number of observed PFS or OS events is reached. Events censored by
-dropout are not counted. The result can be passed to
+dropout or, for PFS, by the censoring of PFS are not counted. The result
+can be passed to
 [`CutoffData`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/CutoffData.md)
 for event-driven analyses.
 

@@ -12,7 +12,11 @@ AverageHR(
   n,
   a.time = NULL,
   a.rate = NULL,
+  a.prop = NULL,
   d.hazard = 0,
+  d.median = NULL,
+  d.time = NULL,
+  pfs.cens.hazard = 0,
   endpoint = c("os", "pfs"),
   time
 )
@@ -28,14 +32,20 @@ AverageHR(
 
   Sample sizes of the two groups.
 
-- a.time, a.rate:
+- a.time, a.rate, a.prop:
 
   Accrual as in
   [`rOncoEndpoints`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/rOncoEndpoints.md).
 
-- d.hazard:
+- d.hazard, d.median, d.time:
 
-  Dropout hazard, a scalar or one value per group.
+  Dropout as in
+  [`rOncoEndpoints`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/rOncoEndpoints.md).
+
+- pfs.cens.hazard:
+
+  Hazard of the censoring of PFS, a scalar or one value per group (used
+  for `endpoint = "pfs"` only).
 
 - endpoint:
 

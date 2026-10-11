@@ -61,7 +61,11 @@ number of events is expected.</p>
 <span>  <span class="va">n</span>,</span>
 <span>  a.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  a.rate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  a.prop <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  d.hazard <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  d.median <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  d.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pfs.cens.hazard <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  endpoint <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"os"</span>, <span class="st">"pfs"</span><span class="op">)</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.025</span>,</span>
 <span>  power <span class="op">=</span> <span class="fl">0.8</span>,</span>
@@ -81,12 +85,17 @@ number of events is expected.</p>
 <dd><p>Sample sizes of the two groups.</p></dd>
 
 
-<dt id="arg-a-time-a-rate">a.time, a.rate<a class="anchor" aria-label="anchor" href="#arg-a-time-a-rate"></a></dt>
+<dt id="arg-a-time-a-rate-a-prop">a.time, a.rate, a.prop<a class="anchor" aria-label="anchor" href="#arg-a-time-a-rate-a-prop"></a></dt>
 <dd><p>Accrual as in <code><a href="rOncoEndpoints.html">rOncoEndpoints</a></code>.</p></dd>
 
 
-<dt id="arg-d-hazard">d.hazard<a class="anchor" aria-label="anchor" href="#arg-d-hazard"></a></dt>
-<dd><p>Dropout hazard, a scalar or one value per group.</p></dd>
+<dt id="arg-d-hazard-d-median-d-time">d.hazard, d.median, d.time<a class="anchor" aria-label="anchor" href="#arg-d-hazard-d-median-d-time"></a></dt>
+<dd><p>Dropout as in <code><a href="rOncoEndpoints.html">rOncoEndpoints</a></code>.</p></dd>
+
+
+<dt id="arg-pfs-cens-hazard">pfs.cens.hazard<a class="anchor" aria-label="anchor" href="#arg-pfs-cens-hazard"></a></dt>
+<dd><p>Hazard of the censoring of PFS, a scalar or one
+value per group (used for <code>endpoint = "pfs"</code> only).</p></dd>
 
 
 <dt id="arg-endpoint">endpoint<a class="anchor" aria-label="anchor" href="#arg-endpoint"></a></dt>
@@ -124,7 +133,10 @@ the number of events and the analysis time are found by iteration: the
 analysis time is the calendar time at which <code>D</code> events are expected,
 and the average hazard ratio is recomputed at that time until the rounded
 number of events no longer changes. For exponential PFS in both groups the
-hazard ratio is constant and the result is the usual Schoenfeld number.</p>
+hazard ratio is constant and the result is the usual Schoenfeld number.
+The derivation assumes the same censoring distribution in the two groups;
+with unequal dropout or censoring of PFS the formula is a further
+approximation.</p>
     </div>
 
     <div class="section level2">

@@ -4,14 +4,18 @@ drawn from the dqrng generator in the following order, each as one
 block of nsim * n values: latent PFS score, independent normal for
 response, uniform for the type of the PFS event, standard exponential for
 post-progression survival, uniform for the time to response, uniform for
-accrual, standard exponential for dropout. The draws are then transformed
-by coronco::transform_one() (see transform_core.h)."><meta property="og:description" content="Internal C++ kernel of rOncoEndpoints. Random numbers are
+accrual, standard exponential for dropout, and, only when
+pc_hazard &amp;gt; 0, standard exponential for the censoring of PFS. The
+draws are then transformed by coronco::transform_one() (see
+transform_core.h)."><meta property="og:description" content="Internal C++ kernel of rOncoEndpoints. Random numbers are
 drawn from the dqrng generator in the following order, each as one
 block of nsim * n values: latent PFS score, independent normal for
 response, uniform for the type of the PFS event, standard exponential for
 post-progression survival, uniform for the time to response, uniform for
-accrual, standard exponential for dropout. The draws are then transformed
-by coronco::transform_one() (see transform_core.h)."></head><body>
+accrual, standard exponential for dropout, and, only when
+pc_hazard &amp;gt; 0, standard exponential for the censoring of PFS. The
+draws are then transformed by coronco::transform_one() (see
+transform_core.h)."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -59,8 +63,10 @@ drawn from the <code>dqrng</code> generator in the following order, each as one
 block of <code>nsim * n</code> values: latent PFS score, independent normal for
 response, uniform for the type of the PFS event, standard exponential for
 post-progression survival, uniform for the time to response, uniform for
-accrual, standard exponential for dropout. The draws are then transformed
-by <code>coronco::transform_one()</code> (see <code>transform_core.h</code>).</p>
+accrual, standard exponential for dropout, and, only when
+<code>pc_hazard &gt; 0</code>, standard exponential for the censoring of PFS. The
+draws are then transformed by <code>coronco::transform_one()</code> (see
+<code>transform_core.h</code>).</p>
     </div>
 
     <div class="section level2">
@@ -84,8 +90,11 @@ by <code>coronco::transform_one()</code> (see <code>transform_core.h</code>).</p
 <span>  <span class="va">ttr_mode</span>,</span>
 <span>  <span class="va">ttr_rate</span>,</span>
 <span>  <span class="va">a_time</span>,</span>
-<span>  <span class="va">a_cum</span>,</span>
-<span>  <span class="va">d_hazard</span></span>
+<span>  <span class="va">a_counts</span>,</span>
+<span>  <span class="va">d_time</span>,</span>
+<span>  <span class="va">d_hazard</span>,</span>
+<span>  <span class="va">d_cum</span>,</span>
+<span>  <span class="va">pc_hazard</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -126,12 +135,23 @@ model and its tabulated cumulative post-progression hazard.</p></dd>
 <dd><p>Rate of the untruncated time to response.</p></dd>
 
 
-<dt id="arg-a-time-a-cum">a_time, a_cum<a class="anchor" aria-label="anchor" href="#arg-a-time-a-cum"></a></dt>
-<dd><p>Accrual breakpoints and cumulative probabilities.</p></dd>
+<dt id="arg-a-time">a_time<a class="anchor" aria-label="anchor" href="#arg-a-time"></a></dt>
+<dd><p>Accrual breakpoints.</p></dd>
 
 
-<dt id="arg-d-hazard">d_hazard<a class="anchor" aria-label="anchor" href="#arg-d-hazard"></a></dt>
-<dd><p>Dropout hazard (0 for no dropout).</p></dd>
+<dt id="arg-a-counts">a_counts<a class="anchor" aria-label="anchor" href="#arg-a-counts"></a></dt>
+<dd><p>Number of patients of the group in each accrual interval
+(empty when all patients enter at <code>a_time[1]</code>).</p></dd>
+
+
+<dt id="arg-d-time-d-hazard-d-cum">d_time, d_hazard, d_cum<a class="anchor" aria-label="anchor" href="#arg-d-time-d-hazard-d-cum"></a></dt>
+<dd><p>Left ends, hazards and cumulative hazards of
+the pieces of the dropout distribution (one piece for exponential
+dropout; a zero hazard for no dropout).</p></dd>
+
+
+<dt id="arg-pc-hazard">pc_hazard<a class="anchor" aria-label="anchor" href="#arg-pc-hazard"></a></dt>
+<dd><p>Hazard of the censoring of PFS (0 for none).</p></dd>
 
 </dl></div>
     <div class="section level2">

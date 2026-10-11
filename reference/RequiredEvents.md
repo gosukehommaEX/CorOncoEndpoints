@@ -14,7 +14,11 @@ RequiredEvents(
   n,
   a.time = NULL,
   a.rate = NULL,
+  a.prop = NULL,
   d.hazard = 0,
+  d.median = NULL,
+  d.time = NULL,
+  pfs.cens.hazard = 0,
   endpoint = c("os", "pfs"),
   alpha = 0.025,
   power = 0.8,
@@ -32,14 +36,20 @@ RequiredEvents(
 
   Sample sizes of the two groups.
 
-- a.time, a.rate:
+- a.time, a.rate, a.prop:
 
   Accrual as in
   [`rOncoEndpoints`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/rOncoEndpoints.md).
 
-- d.hazard:
+- d.hazard, d.median, d.time:
 
-  Dropout hazard, a scalar or one value per group.
+  Dropout as in
+  [`rOncoEndpoints`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/rOncoEndpoints.md).
+
+- pfs.cens.hazard:
+
+  Hazard of the censoring of PFS, a scalar or one value per group (used
+  for `endpoint = "pfs"` only).
 
 - endpoint:
 
@@ -75,7 +85,9 @@ found by iteration: the analysis time is the calendar time at which `D`
 events are expected, and the average hazard ratio is recomputed at that
 time until the rounded number of events no longer changes. For
 exponential PFS in both groups the hazard ratio is constant and the
-result is the usual Schoenfeld number.
+result is the usual Schoenfeld number. The derivation assumes the same
+censoring distribution in the two groups; with unequal dropout or
+censoring of PFS the formula is a further approximation.
 
 ## Examples
 

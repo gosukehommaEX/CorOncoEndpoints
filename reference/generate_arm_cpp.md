@@ -6,8 +6,9 @@ Random numbers are drawn from the `dqrng` generator in the following
 order, each as one block of `nsim * n` values: latent PFS score,
 independent normal for response, uniform for the type of the PFS event,
 standard exponential for post-progression survival, uniform for the time
-to response, uniform for accrual, standard exponential for dropout. The
-draws are then transformed by `coronco::transform_one()` (see
+to response, uniform for accrual, standard exponential for dropout, and,
+only when `pc_hazard > 0`, standard exponential for the censoring of
+PFS. The draws are then transformed by `coronco::transform_one()` (see
 `transform_core.h`).
 
 ## Usage
@@ -32,8 +33,11 @@ generate_arm_cpp(
   ttr_mode,
   ttr_rate,
   a_time,
-  a_cum,
-  d_hazard
+  a_counts,
+  d_time,
+  d_hazard,
+  d_cum,
+  pc_hazard
 )
 ```
 
@@ -72,13 +76,24 @@ generate_arm_cpp(
 
   Rate of the untruncated time to response.
 
-- a_time, a_cum:
+- a_time:
 
-  Accrual breakpoints and cumulative probabilities.
+  Accrual breakpoints.
 
-- d_hazard:
+- a_counts:
 
-  Dropout hazard (0 for no dropout).
+  Number of patients of the group in each accrual interval (empty when
+  all patients enter at `a_time[1]`).
+
+- d_time, d_hazard, d_cum:
+
+  Left ends, hazards and cumulative hazards of the pieces of the dropout
+  distribution (one piece for exponential dropout; a zero hazard for no
+  dropout).
+
+- pc_hazard:
+
+  Hazard of the censoring of PFS (0 for none).
 
 ## Value
 
