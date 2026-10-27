@@ -66,7 +66,7 @@
       <h1>2-in-1 adaptive design</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/gosukehommaEX/CorOncoEndpoints/blob/v0.3.0/vignettes/two-in-one.Rmd" class="external-link"><code>vignettes/two-in-one.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/gosukehommaEX/CorOncoEndpoints/blob/main/vignettes/two-in-one.Rmd" class="external-link"><code>vignettes/two-in-one.Rmd</code></a></small>
       <div class="d-none name"><code>two-in-one.Rmd</code></div>
     </div>
 
@@ -100,9 +100,10 @@ the first 90 patients, 3 months after the last of them has entered, and
 counts only responses observed by then. The small trial ends at 70 PFS
 events, and <code>Y</code> is the log-rank statistic for PFS. In an
 expansion, 380 further patients are enrolled at 30 per month from month
-12, and the large trial ends at 330 deaths, with <code>Z</code> the
-log-rank statistic for OS. Under the global null hypothesis, both groups
-have the same distribution:</p>
+12 or from the interim analysis, whichever is later, so that no patient
+of the expansion enters before the decision. The large trial ends at 330
+deaths, with <code>Z</code> the log-rank statistic for OS. Under the
+global null hypothesis, both groups have the same distribution:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/OncoArm.html">OncoArm</a></span><span class="op">(</span>pfs.median <span class="op">=</span> <span class="fl">6</span>, orr <span class="op">=</span> <span class="fl">0.30</span>, resp.cor <span class="op">=</span> <span class="fl">0.40</span>, death.prop <span class="op">=</span> <span class="fl">0.15</span>,</span>
 <span>               os.median <span class="op">=</span> <span class="fl">15</span>, pps.hr.resp <span class="op">=</span> <span class="fl">0.6</span>, resp.timing <span class="op">=</span> <span class="st">"ttr"</span>,</span>
@@ -114,19 +115,35 @@ have the same distribution:</p>
 </h2>
 <p>Both parts of every trial are generated, and whether the expansion
 takes place is decided afterwards from <code>X</code>, so that every
-cutpoint is evaluated on the same trials. The expansion starts at month
-12 (<code>a.time = 12</code>) and enrolls 30 patients per month until
-its 380 patients are enrolled; it uses another random-number stream than
-the small part.</p>
+cutpoint is evaluated on the same trials. The interim analysis takes
+place 3 months after the entry of the 90th patient of the small part,
+which can be after month 12. The expansion enrolls 30 patients per month
+until its 380 patients are enrolled, starting at month 12 or at the
+interim analysis, whichever is later: it is generated from time 0
+(<code>a.time = 0</code>) and shifted to its start in each trial. It
+uses another random-number stream than the small part.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nsim</span> <span class="op">&lt;-</span> <span class="fl">1000</span></span>
 <span><span class="va">small</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rOncoEndpoints.html">rOncoEndpoints</a></span><span class="op">(</span>nsim <span class="op">=</span> <span class="va">nsim</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">60</span>, <span class="fl">60</span><span class="op">)</span>, arms <span class="op">=</span> <span class="va">arms</span>,</span>
 <span>                        a.time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">12</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">2018</span><span class="op">)</span></span>
+<span><span class="co"># time of the interim analysis: 3 months after the entry of the 90th patient</span></span>
+<span><span class="va">small</span> <span class="op">&lt;-</span> <span class="va">small</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">small</span><span class="op">$</span><span class="va">sim</span>, <span class="va">small</span><span class="op">$</span><span class="va">accrual_time</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="va">first90</span> <span class="op">&lt;-</span> <span class="va">small</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/stats/ave.html" class="external-link">ave</a></span><span class="op">(</span><span class="va">small</span><span class="op">$</span><span class="va">accrual_time</span>, <span class="va">small</span><span class="op">$</span><span class="va">sim</span>, FUN <span class="op">=</span> <span class="va">seq_along</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="fl">90</span>, <span class="op">]</span></span>
+<span><span class="va">t_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">first90</span><span class="op">$</span><span class="va">accrual_time</span>, <span class="va">first90</span><span class="op">$</span><span class="va">sim</span>, <span class="va">max</span><span class="op">)</span> <span class="op">+</span> <span class="fl">3</span></span>
+<span><span class="co"># expansion: 30 patients per month from month 12 or from the interim analysis,</span></span>
+<span><span class="co"># whichever is later</span></span>
+<span><span class="va">start</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fl">12</span>, <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">t_x</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">expansion</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rOncoEndpoints.html">rOncoEndpoints</a></span><span class="op">(</span>nsim <span class="op">=</span> <span class="va">nsim</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">190</span>, <span class="fl">190</span><span class="op">)</span>, arms <span class="op">=</span> <span class="va">arms</span>,</span>
-<span>                            a.time <span class="op">=</span> <span class="fl">12</span>, a.rate <span class="op">=</span> <span class="fl">30</span>, seed <span class="op">=</span> <span class="fl">2018</span>, stream <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span>                            a.time <span class="op">=</span> <span class="fl">0</span>, a.rate <span class="op">=</span> <span class="fl">30</span>, seed <span class="op">=</span> <span class="fl">2018</span>, stream <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">expansion</span><span class="op">$</span><span class="va">accrual_time</span> <span class="op">&lt;-</span> <span class="va">expansion</span><span class="op">$</span><span class="va">accrual_time</span> <span class="op">+</span> <span class="va">start</span><span class="op">[</span><span class="va">expansion</span><span class="op">$</span><span class="va">sim</span><span class="op">]</span></span>
+<span><span class="va">expansion</span><span class="op">$</span><span class="va">pfs_calendar_time</span> <span class="op">&lt;-</span> <span class="va">expansion</span><span class="op">$</span><span class="va">accrual_time</span> <span class="op">+</span> <span class="va">expansion</span><span class="op">$</span><span class="va">pfs_tte</span></span>
+<span><span class="va">expansion</span><span class="op">$</span><span class="va">os_calendar_time</span> <span class="op">&lt;-</span> <span class="va">expansion</span><span class="op">$</span><span class="va">accrual_time</span> <span class="op">+</span> <span class="va">expansion</span><span class="op">$</span><span class="va">os_tte</span></span>
 <span><span class="va">large</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">small</span>, <span class="va">expansion</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">expansion</span><span class="op">$</span><span class="va">accrual_time</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 12.00000 24.66661</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">start</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span><span class="co">#&gt;   12.00   12.00   12.00   12.15   12.25   13.37</span></span></code></pre></div>
+<p>The interim analysis took place after month 12 in 45% of the trials;
+in these trials the expansion started at the interim analysis.</p>
 <p>The statistics are computed with <code><a href="../reference/CutoffData.html">CutoffData()</a></code> and
 <code><a href="../reference/EventTime.html">EventTime()</a></code>, the pooled test of two proportions for
 <code>X</code>, and <code><a href="https://rdrr.io/pkg/survival/man/survdiff.html" class="external-link">survival::survdiff()</a></code> for the log-rank
@@ -151,19 +168,16 @@ group.</p>
 <span>    <span class="op">-</span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">obs</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">-</span> <span class="va">s</span><span class="op">$</span><span class="va">exp</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">var</span><span class="op">[</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co"># interim analysis: first 90 patients of the small part</span></span>
-<span><span class="va">small</span> <span class="op">&lt;-</span> <span class="va">small</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">small</span><span class="op">$</span><span class="va">sim</span>, <span class="va">small</span><span class="op">$</span><span class="va">accrual_time</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="va">first90</span> <span class="op">&lt;-</span> <span class="va">small</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/stats/ave.html" class="external-link">ave</a></span><span class="op">(</span><span class="va">small</span><span class="op">$</span><span class="va">accrual_time</span>, <span class="va">small</span><span class="op">$</span><span class="va">sim</span>, FUN <span class="op">=</span> <span class="va">seq_along</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="fl">90</span>, <span class="op">]</span></span>
-<span><span class="va">t_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">first90</span><span class="op">$</span><span class="va">accrual_time</span>, <span class="va">first90</span><span class="op">$</span><span class="va">sim</span>, <span class="va">max</span><span class="op">)</span> <span class="op">+</span> <span class="fl">3</span></span>
+<span><span class="co"># interim analysis: first 90 patients of the small part, at t_x</span></span>
 <span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu">orr_z</span><span class="op">(</span><span class="fu"><a href="../reference/CutoffData.html">CutoffData</a></span><span class="op">(</span><span class="va">first90</span>, <span class="va">t_x</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># end of the small trial (70 PFS events) and of the large trial (330 deaths)</span></span>
 <span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu">logrank_z</span><span class="op">(</span><span class="fu"><a href="../reference/CutoffData.html">CutoffData</a></span><span class="op">(</span><span class="va">small</span>, <span class="fu"><a href="../reference/EventTime.html">EventTime</a></span><span class="op">(</span><span class="va">small</span>, <span class="fl">70</span>, <span class="st">"pfs"</span><span class="op">)</span><span class="op">)</span>, <span class="st">"pfs_tte"</span>, <span class="st">"pfs_event"</span><span class="op">)</span></span>
 <span><span class="va">Z</span> <span class="op">&lt;-</span> <span class="fu">logrank_z</span><span class="op">(</span><span class="fu"><a href="../reference/CutoffData.html">CutoffData</a></span><span class="op">(</span><span class="va">large</span>, <span class="fu"><a href="../reference/EventTime.html">EventTime</a></span><span class="op">(</span><span class="va">large</span>, <span class="fl">330</span>, <span class="st">"os"</span><span class="op">)</span><span class="op">)</span>, <span class="st">"os_tte"</span>, <span class="st">"os_event"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, <span class="va">Z</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       X     Y     Z</span></span>
-<span><span class="co">#&gt; X 1.000 0.368 0.148</span></span>
-<span><span class="co">#&gt; Y 0.368 1.000 0.248</span></span>
-<span><span class="co">#&gt; Z 0.148 0.248 1.000</span></span></code></pre></div>
+<span><span class="co">#&gt; X 1.000 0.368 0.149</span></span>
+<span><span class="co">#&gt; Y 0.368 1.000 0.249</span></span>
+<span><span class="co">#&gt; Z 0.149 0.249 1.000</span></span></code></pre></div>
 <p>The correlation of <code>X</code> with <code>Y</code> is 0.37 and
 that with <code>Z</code> is 0.15. The interim population overlaps more
 with the small trial (90 of 120 patients) than with the large trial (90

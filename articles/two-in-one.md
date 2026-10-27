@@ -26,9 +26,11 @@ standardized difference in response rates among the first 90 patients, 3
 months after the last of them has entered, and counts only responses
 observed by then. The small trial ends at 70 PFS events, and `Y` is the
 log-rank statistic for PFS. In an expansion, 380 further patients are
-enrolled at 30 per month from month 12, and the large trial ends at 330
-deaths, with `Z` the log-rank statistic for OS. Under the global null
-hypothesis, both groups have the same distribution:
+enrolled at 30 per month from month 12 or from the interim analysis,
+whichever is later, so that no patient of the expansion enters before
+the decision. The large trial ends at 330 deaths, with `Z` the log-rank
+statistic for OS. Under the global null hypothesis, both groups have the
+same distribution:
 
 ``` r
 
@@ -42,21 +44,39 @@ arms <- list(Control = ctl, Treatment = ctl)
 
 Both parts of every trial are generated, and whether the expansion takes
 place is decided afterwards from `X`, so that every cutpoint is
-evaluated on the same trials. The expansion starts at month 12
-(`a.time = 12`) and enrolls 30 patients per month until its 380 patients
-are enrolled; it uses another random-number stream than the small part.
+evaluated on the same trials. The interim analysis takes place 3 months
+after the entry of the 90th patient of the small part, which can be
+after month 12. The expansion enrolls 30 patients per month until its
+380 patients are enrolled, starting at month 12 or at the interim
+analysis, whichever is later: it is generated from time 0 (`a.time = 0`)
+and shifted to its start in each trial. It uses another random-number
+stream than the small part.
 
 ``` r
 
 nsim <- 1000
 small <- rOncoEndpoints(nsim = nsim, n = c(60, 60), arms = arms,
                         a.time = c(0, 12), seed = 2018)
+# time of the interim analysis: 3 months after the entry of the 90th patient
+small <- small[order(small$sim, small$accrual_time), ]
+first90 <- small[ave(small$accrual_time, small$sim, FUN = seq_along) <= 90, ]
+t_x <- tapply(first90$accrual_time, first90$sim, max) + 3
+# expansion: 30 patients per month from month 12 or from the interim analysis,
+# whichever is later
+start <- pmax(12, as.vector(t_x))
 expansion <- rOncoEndpoints(nsim = nsim, n = c(190, 190), arms = arms,
-                            a.time = 12, a.rate = 30, seed = 2018, stream = 1)
+                            a.time = 0, a.rate = 30, seed = 2018, stream = 1)
+expansion$accrual_time <- expansion$accrual_time + start[expansion$sim]
+expansion$pfs_calendar_time <- expansion$accrual_time + expansion$pfs_tte
+expansion$os_calendar_time <- expansion$accrual_time + expansion$os_tte
 large <- rbind(small, expansion)
-range(expansion$accrual_time)
-#> [1] 12.00000 24.66661
+summary(start)
+#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#>   12.00   12.00   12.00   12.15   12.25   13.37
 ```
+
+The interim analysis took place after month 12 in 45% of the trials; in
+these trials the expansion started at the interim analysis.
 
 The statistics are computed with
 [`CutoffData()`](https://gosukehommaEX.github.io/CorOncoEndpoints/reference/CutoffData.md)
@@ -87,19 +107,16 @@ logrank_z <- function(d, tte, event) {
     -(s$obs[2] - s$exp[2]) / sqrt(s$var[2, 2])
   }, numeric(1))
 }
-# interim analysis: first 90 patients of the small part
-small <- small[order(small$sim, small$accrual_time), ]
-first90 <- small[ave(small$accrual_time, small$sim, FUN = seq_along) <= 90, ]
-t_x <- tapply(first90$accrual_time, first90$sim, max) + 3
+# interim analysis: first 90 patients of the small part, at t_x
 X <- orr_z(CutoffData(first90, t_x))
 # end of the small trial (70 PFS events) and of the large trial (330 deaths)
 Y <- logrank_z(CutoffData(small, EventTime(small, 70, "pfs")), "pfs_tte", "pfs_event")
 Z <- logrank_z(CutoffData(large, EventTime(large, 330, "os")), "os_tte", "os_event")
 round(cor(cbind(X, Y, Z)), 3)
 #>       X     Y     Z
-#> X 1.000 0.368 0.148
-#> Y 0.368 1.000 0.248
-#> Z 0.148 0.248 1.000
+#> X 1.000 0.368 0.149
+#> Y 0.368 1.000 0.249
+#> Z 0.149 0.249 1.000
 ```
 
 The correlation of `X` with `Y` is 0.37 and that with `Z` is 0.15. The
