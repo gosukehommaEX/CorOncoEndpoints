@@ -13,7 +13,8 @@
 #   end of the small trial: 70 PFS events in the 120 patients;
 #     log-rank statistics Y_PFS and Y_OS
 #   expansion: 380 further patients (190 per group) enrolled over 380 / 30
-#     months after month 12; end of the large trial at 330 deaths in all 500
+#     months from month 12 or from the interim analysis, whichever is later;
+#     end of the large trial at 330 deaths in all 500
 #     patients; log-rank statistics Z_PFS and Z_OS
 # The statistics are stored for every trial, so that any expansion cutpoint and
 # decision rule can be evaluated without new simulations.

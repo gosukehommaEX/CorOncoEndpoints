@@ -23,7 +23,9 @@ sm <- do.call(rbind, lapply(seq_along(sim$results), function(s) {
              go = go, ess = n_small + go * (n_large - n_small),
              success_chen = mean(two_in_one_rules(st, c0, "chen")),
              success_g1 = mean(two_in_one_rules(st, c0, "g1")),
-             t_x = mean(st$t_x), t_y = mean(st$t_y), t_z = mean(st$t_z), nsim = nrow(st))
+             t_x = mean(st$t_x),
+             interim_after_accrual = mean(st$t_x > sim$design$accrual_small),
+             t_y = mean(st$t_y), t_z = mean(st$t_z), nsim = nrow(st))
 }))
 lab_type <- c(N1 = "Global null", N2 = "Response only", A = "Alternative")
 body <- c()

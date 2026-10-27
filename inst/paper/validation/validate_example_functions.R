@@ -156,6 +156,21 @@ add("2-in-1 data", "patients per trial in the small part", 120,
 add("2-in-1 data", "small part enrolled before the expansion part (all trials)", 1,
     as.numeric(all(tapply(d2$accrual_time[d2$part == 1], d2$sim[d2$part == 1], max) <=
                      tapply(d2$accrual_time[d2$part == 2], d2$sim[d2$part == 2], min))), 0)
+# start of the expansion recomputed from the sorted entry times of the small
+# part; 50 trials, so that the interim analysis falls after month 12 in some of
+# them (the number is shown in the quantity)
+d3 <- two_in_one_data(50, arms, design, seed = 9102)
+exp_start <- vapply(1:50, function(s) {
+  ent <- sort(d3$accrual_time[d3$sim == s & d3$part == 1])
+  max(design$accrual_small, ent[design$m_interim] + design$fu_interim)
+}, numeric(1))
+e2 <- d3$accrual_time[d3$part == 2]
+s2 <- d3$sim[d3$part == 2]
+add("2-in-1 data", paste0("expansion enrolled from month 12 or the interim analysis, whichever is later ",
+                          "(50 trials, ", sum(exp_start > design$accrual_small),
+                          " with the interim analysis after month 12)"), 1,
+    as.numeric(all(tapply(e2, s2, min) >= exp_start &
+                     tapply(e2, s2, max) <= exp_start + design$accrual_expand)), 0)
 ref_stat <- t(vapply(1:5, function(s) {
   ds <- d2[d2$sim == s, ]
   sm <- ds[ds$part == 1, ]

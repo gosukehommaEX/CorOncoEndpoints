@@ -1,18 +1,21 @@
 # Simulated patients of a batch of 2-in-1 trials
 #
 # Patients of the small (phase 2) part are enrolled uniformly over
-# [0, design$accrual_small]; the additional patients of the expansion are
-# enrolled uniformly over [design$accrual_small, design$accrual_small +
-# design$accrual_expand]. Both parts are generated for every trial; whether
-# the expansion takes place is decided later from the interim data, so the
-# same trials serve every expansion cutpoint. The expansion part uses the seed
-# plus 500000.
+# [0, design$accrual_small]. The interim analysis takes place design$fu_interim
+# months after the enrolment of the design$m_interim-th patient of the small
+# part (as in two_in_one_statistics()), and the additional patients of the
+# expansion are enrolled uniformly over [s, s + design$accrual_expand], where s
+# is design$accrual_small or the time of the interim analysis, whichever is
+# later, so that no patient of the expansion enters before the decision. Both
+# parts are generated for every trial; whether the expansion takes place is
+# decided later from the interim data, so the same trials serve every
+# expansion cutpoint. The expansion part uses the seed plus 500000.
 #
 # Arguments
 #   nsim   number of trials in the batch
 #   arms   list(Control = , Treatment = ) of OncoArm objects
 #   design list with n_small (two sample sizes), accrual_small, n_expand (two
-#          sample sizes) and accrual_expand
+#          sample sizes), accrual_expand, m_interim and fu_interim
 #   seed   integer seed of the small part
 # Value
 #   data frame as returned by rOncoEndpoints() with the added column part
@@ -22,7 +25,13 @@ two_in_one_data <- function(nsim, arms, design, seed) {
                        a.time = c(0, design$accrual_small), seed = seed)
   p2 <- rOncoEndpoints(nsim = nsim, n = design$n_expand, arms = arms,
                        a.time = c(0, design$accrual_expand), seed = seed + 500000L)
-  p2$accrual_time <- p2$accrual_time + design$accrual_small
+  # start of the expansion: end of the accrual of the small part or the interim
+  # analysis, whichever is later
+  pi1 <- p1[first_enrolled(p1$sim, p1$accrual_time, design$m_interim), , drop = FALSE]
+  t_x <- as.vector(tapply(pi1$accrual_time, factor(pi1$sim, levels = seq_len(nsim)), max)) +
+    design$fu_interim
+  start <- pmax(design$accrual_small, t_x)
+  p2$accrual_time <- p2$accrual_time + start[p2$sim]
   p2$pfs_calendar_time <- p2$accrual_time + p2$pfs_tte
   p2$os_calendar_time <- p2$accrual_time + p2$os_tte
   p1$part <- 1L
